@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+npm-debug.*
+pnpm-lock.yaml
+yarn.lock
+
+# Build output
+dist/
+build/
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Temporary files created by Slidev
+.temp/
+slidev-export/
+
+# Environment variables
+.env
+.env.local
+
+*.pptx

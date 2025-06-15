@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 25px;
+  transition: all 0.3s;
+  background-color: rgba(106, 115, 125, 0.2);
+  &:hover {
+    background-color: rgba(106, 115, 125, 0.27);
+  }
+}
+
+::-webkit-scrollbar-corner {
+  display: none;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+.marker-hover {
+  transform: scale(1.1);
+  /* Ensure z-index is high enough if needed, but usually not necessary for scale */
+  /* z-index: 10; */
+}
+
+/* Custom styles for chat bubble content */
+.chat-bubble-content {
+  overflow-wrap: break-word; /* More robust word wrapping */
+  word-wrap: break-word; /* Legacy support */
+  word-break: break-word; /* Break long words if necessary */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  display: inline-block; /* Ensure max-width works correctly */
+}
+
+/* Custom styles for chat bubble content */
+.chat-bubble-content {
+  overflow-wrap: break-word; /* More robust word wrapping */
+  word-wrap: break-word; /* Legacy support */
+  word-break: break-word; /* Break long words if necessary */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  display: inline-block; /* Ensure max-width works correctly */
+}
+
+/* Custom styles for chat bubble content */
+.chat-bubble-content {
+  overflow-wrap: break-word; /* More robust word wrapping */
+  word-wrap: break-word; /* Legacy support */
+  word-break: break-word; /* Break long words if necessary */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  display: inline-block; /* Ensure max-width works correctly */
+}
+
+/* Custom styles for chat bubble content */
+.chat-bubble-content {
+  overflow-wrap: break-word; /* More robust word wrapping */
+  word-wrap: break-word; /* Legacy support */
+  word-break: break-all; /* Break long words if necessary */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  display: inline-block; /* Ensure max-width works correctly */
+}
+
+/* Custom styles for chat bubble content */
+.chat-bubble-content {
+  overflow-wrap: break-word; /* More robust word wrapping */
+  word-wrap: break-word; /* Legacy support */
+  word-break: break-all; /* Break long words if necessary */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  display: inline-block; /* Ensure max-width works correctly */
+}
+
+/* Custom styles for chat bubble content */
+.chat-bubble-content {
+  overflow-wrap: break-word; /* More robust word wrapping */
+  word-wrap: break-word; /* Legacy support */
+  word-break: break-all; /* Break long words if necessary */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  display: inline-block; /* Ensure max-width works correctly */
+}
+
+/* Custom styles for chat bubble content */
+.chat-bubble-content {
+  overflow-wrap: break-word; /* More robust word wrapping */
+  word-wrap: break-word; /* Legacy support */
+  word-break: break-all; /* Break long words if necessary */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  display: inline-block; /* Ensure max-width works correctly */
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-in-left {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .animate-fade-in { animation: fade-in 1.5s ease-in-out; }
+  .animate-slide-in-left { animation: slide-in-left 1s ease-out; }
+}

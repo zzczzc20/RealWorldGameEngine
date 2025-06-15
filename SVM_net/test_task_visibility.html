@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务可见性测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .danger {
+            background-color: #dc3545;
+        }
+        .danger:hover {
+            background-color: #c82333;
+        }
+        .success {
+            background-color: #28a745;
+        }
+        .success:hover {
+            background-color: #218838;
+        }
+        pre {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #555;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.info {
+            background-color: #17a2b8;
+        }
+        .status.warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .status.error {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>SVM_net 任务可见性测试工具</h1>
+    
+    <div class="test-section">
+        <h2>当前状态检查</h2>
+        <button onclick="checkCurrentState()">检查当前状态</button>
+        <button onclick="checkTaskData()">检查任务数据</button>
+        <div id="currentState"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>localStorage 管理</h2>
+        <button class="danger" onclick="clearLocalStorage()">清除 localStorage</button>
+        <button onclick="showLocalStorage()">显示 localStorage 内容</button>
+        <div id="localStorageContent"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>任务解锁测试</h2>
+        <button class="success" onclick="unlockTask('RIFT_TUNER_ECHO')">解锁 Echo 任务</button>
+        <button class="success" onclick="unlockTask('RIFT_TUNER_KIERA')">解锁 Kiera 任务</button>
+        <button class="success" onclick="unlockTask('RIFT_TUNER_AHMING')">解锁 Ahming 任务</button>
+        <div id="unlockResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>预期行为说明</h2>
+        <div class="status info">
+            <strong>预期行为：</strong>
+            <ul>
+                <li>初始状态下，只有 "TEST_VISIBLE_TASK" 应该显示在任务列表中</li>
+                <li>所有 RIFT_TUNER 任务的 initiallyVisible 都设置为 false</li>
+                <li>只有通过脚本执行 UNLOCK_TASK 指令后，这些任务才会显示</li>
+                <li>清除 localStorage 后重新加载页面，应该回到初始状态</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function checkCurrentState() {
+            const worldState = localStorage.getItem('worldState');
+            const resultDiv = document.getElementById('currentState');
+            
+            if (worldState) {
+                try {
+                    const parsed = JSON.parse(worldState);
+                    const unlockedTasks = parsed.unlockedTasks || [];
+                    
+                    resultDiv.innerHTML = `
+                        <div class="status info">
+                            <h3>当前已解锁任务：</h3>
+                            <pre>${JSON.stringify(unlockedTasks, null, 2)}</pre>
+                            <p>已解锁任务数量：${unlockedTasks.length}</p>
+                        </div>
+                    `;
+                } catch (e) {
+                    resultDiv.innerHTML = `<div class="status error">解析 localStorage 失败：${e.message}</div>`;
+                }
+            } else {
+                resultDiv.innerHTML = `<div class="status warning">localStorage 中没有 worldState 数据</div>`;
+            }
+        }
+
+        function checkTaskData() {
+            // 模拟任务数据检查
+            const tasks = [
+                { taskId: "RIFT_TUNER_ECHO", initiallyVisible: false },
+                { taskId: "RIFT_TUNER_KIERA", initiallyVisible: false },
+                { taskId: "RIFT_TUNER_AHMING", initiallyVisible: false },
+                { taskId: "TEST_VISIBLE_TASK", initiallyVisible: true }
+            ];
+            
+            const resultDiv = document.getElementById('currentState');
+            resultDiv.innerHTML = `
+                <div class="status info">
+                    <h3>任务数据配置：</h3>
+                    <pre>${JSON.stringify(tasks, null, 2)}</pre>
+                    <p>初始可见任务：${tasks.filter(t => t.initiallyVisible).map(t => t.taskId).join(', ')}</p>
+                </div>
+            `;
+        }
+
+        function clearLocalStorage() {
+            if (confirm('确定要清除所有 localStorage 数据吗？这将重置所有游戏状态。')) {
+                localStorage.clear();
+                document.getElementById('localStorageContent').innerHTML = 
+                    `<div class="status info">localStorage 已清除。请刷新页面以查看效果。</div>`;
+            }
+        }
+
+        function showLocalStorage() {
+            const worldState = localStorage.getItem('worldState');
+            const resultDiv = document.getElementById('localStorageContent');
+            
+            if (worldState) {
+                try {
+                    const parsed = JSON.parse(worldState);
+                    resultDiv.innerHTML = `
+                        <div class="status info">
+                            <h3>localStorage 内容：</h3>
+                            <pre>${JSON.stringify(parsed, null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (e) {
+                    resultDiv.innerHTML = `<div class="status error">解析失败：${e.message}</div>`;
+                }
+            } else {
+                resultDiv.innerHTML = `<div class="status warning">localStorage 为空</div>`;
+            }
+        }
+
+        function unlockTask(taskId) {
+            const worldState = localStorage.getItem('worldState');
+            const resultDiv = document.getElementById('unlockResults');
+            
+            if (worldState) {
+                try {
+                    const parsed = JSON.parse(worldState);
+                    const unlockedTasks = parsed.unlockedTasks || [];
+                    
+                    if (!unlockedTasks.includes(taskId)) {
+                        unlockedTasks.push(taskId);
+                        parsed.unlockedTasks = unlockedTasks;
+                        localStorage.setItem('worldState', JSON.stringify(parsed));
+                        
+                        resultDiv.innerHTML = `
+                            <div class="status info">
+                                任务 "${taskId}" 已解锁。请刷新主应用页面查看效果。
+                                <br>当前已解锁任务：${unlockedTasks.join(', ')}
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="status warning">任务 "${taskId}" 已经解锁过了。</div>
+                        `;
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML = `<div class="status error">操作失败：${e.message}</div>`;
+                }
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="status warning">
+                        localStorage 为空，无法解锁任务。请先运行主应用以初始化状态。
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载时自动检查状态
+        window.onload = function() {
+            checkCurrentState();
+        };
+    </script>
+</body>
+</html>

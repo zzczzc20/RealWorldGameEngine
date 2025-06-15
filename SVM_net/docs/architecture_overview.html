@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IdeActuator Demo (SVM_net) - 架构深度解析 v3.2 (AI Chat History Integration)</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS styles remain largely the same as v3.1 */
+        :root {
+            --bg-color: #1a1a2e; /* Dark blue/purple */
+            --text-color: #e0e0e0; /* Light gray/white */
+            --primary-color: #00ffff; /* Cyan accent */
+            --secondary-color: #ff00ff; /* Magenta accent */
+            --tertiary-color: #ffff00; /* Yellow accent for state */
+            --card-bg: #2a2a4a; /* Slightly lighter dark blue */
+            --border-color: #4a4a6a; /* Muted border */
+            --code-bg: #101020; /* Very dark for code blocks */
+            --code-text: #d0d0ff; /* Light purple for code text */
+            --link-color: var(--primary-color);
+            --link-hover-color: var(--secondary-color);
+            --status-implemented-bg: rgba(0, 255, 0, 0.1);
+            --status-implemented-text: #00ff00;
+            --status-partial-bg: rgba(255, 255, 0, 0.1);
+            --status-partial-text: #ffff00;
+            --status-future-bg: rgba(255, 255, 255, 0.1);
+            --status-future-text: #aaaaaa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 30px 50px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.15), 0 0 35px rgba(255, 0, 255, 0.15);
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--primary-color);
+            margin-bottom: 1.2em;
+            padding-bottom: 0.4em;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 2.8em;
+            text-align: center;
+            border-bottom: none;
+            color: var(--primary-color);
+            text-shadow: 0 0 7px var(--primary-color);
+            margin-bottom: 1.8em;
+        }
+         h1 i, h2 i, h3 i, h4 i {
+            margin-right: 0.6em;
+            color: var(--secondary-color);
+            font-size: 0.9em;
+         }
+
+        h2 { font-size: 2em; margin-top: 3em; }
+        h3 { font-size: 1.6em; margin-top: 2.5em; color: var(--secondary-color); border-color: rgba(255, 0, 255, 0.4); }
+        h4 { font-size: 1.2em; margin-top: 2em; color: var(--text-color); border-bottom: none; font-weight: bold; }
+
+
+        p {
+            margin-bottom: 1.5em;
+            font-size: 1.05em;
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+            font-weight: 500;
+        }
+        a:hover {
+            color: var(--link-hover-color);
+            text-decoration: underline;
+            text-shadow: 0 0 4px var(--link-hover-color);
+        }
+
+        code.inline { /* Specific style for inline code */
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em; /* Slightly smaller inline */
+            color: var(--code-text);
+            border: 1px solid var(--border-color);
+            word-break: break-word;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px; /* Adjusted padding */
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em; /* Adjusted font size */
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
+            margin-bottom: 1.8em;
+        }
+        pre code { /* Code inside pre */
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+            font-size: 1em;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; /* Ensure monospace */
+            white-space: pre; /* Preserve whitespace */
+        }
+
+
+        .component {
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            border-left: 6px solid var(--secondary-color);
+            border-radius: 5px;
+            padding: 30px;
+            margin-bottom: 35px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        .component h3 {
+            margin-top: 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        ul, ol {
+            padding-left: 35px;
+            margin-bottom: 1.5em;
+        }
+        li {
+            margin-bottom: 1em;
+            padding-left: 0.8em;
+        }
+        ul li::marker {
+            color: var(--primary-color);
+            content: "\f101";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 0.8em;
+            margin-right: 0.6em;
+        }
+         ol.detailed-flow li {
+            list-style-type: none;
+            counter-increment: flow-step;
+            position: relative;
+            padding-left: 2.5em;
+            margin-bottom: 1.5em;
+         }
+        ol.detailed-flow li::before {
+            content: counter(flow-step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: bold;
+            width: 1.8em;
+            height: 1.8em;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 1.8em;
+            font-size: 1em;
+        }
+        .flow-component {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        .flow-event {
+            font-style: italic;
+            color: var(--primary-color);
+        }
+        .flow-state {
+            color: var(--tertiary-color);
+        }
+        .flow-ui {
+            color: #cccccc;
+        }
+        .flow-code { /* Style for code references in flow */
+             font-family: monospace;
+             font-size: 0.9em;
+             color: #a0a0ff; /* Lighter purple */
+        }
+
+
+        strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        .concept-term {
+             font-weight: bold;
+             color: var(--tertiary-color);
+             border-bottom: 1px dotted var(--tertiary-color);
+        }
+
+        .interaction {
+            font-style: italic;
+            color: #b0b0c0;
+            display: block;
+            margin-top: 0.8em;
+            padding-left: 1.5em;
+            border-left: 3px solid var(--primary-color);
+        }
+        .rationale {
+            background-color: rgba(0, 255, 255, 0.08);
+            border: 1px dashed var(--primary-color);
+            padding: 15px 20px;
+            margin-top: 1.5em;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        .rationale strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5em;
+        }
+        .rationale i {
+             margin-right: 0.5em;
+        }
+
+        .status {
+            font-weight: bold;
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-left: 12px;
+            vertical-align: middle;
+            border: 1px solid;
+        }
+        .status-implemented { background-color: var(--status-implemented-bg); color: var(--status-implemented-text); border-color: var(--status-implemented-text); }
+        .status-partial { background-color: var(--status-partial-bg); color: var(--status-partial-text); border-color: var(--status-partial-text); }
+        .status-future { background-color: var(--status-future-bg); color: var(--status-future-text); border-color: var(--status-future-text); }
+
+        .diagram-container {
+            margin: 50px 0;
+            padding: 30px;
+            background-color: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .diagram-container h3 {
+            border-bottom: none;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        /* SVG Diagram Styles */
+        .arch-diagram { width: 100%; max-width: 900px; margin: 0 auto; font-family: 'Segoe UI', sans-serif; font-size: 12px; } /* Wider diagram */
+        .arch-diagram .box { fill: var(--card-bg); stroke: var(--secondary-color); stroke-width: 1.5; rx: 5; }
+        .arch-diagram .box.hub { stroke: var(--primary-color); stroke-width: 2; }
+        .arch-diagram .box.state { stroke: var(--tertiary-color); stroke-width: 2; } /* Highlight WorldStateContext */
+        .arch-diagram text { fill: var(--text-color); text-anchor: middle; dominant-baseline: central; }
+        .arch-diagram .box-title { font-weight: bold; fill: var(--primary-color); font-size: 13px; }
+        .arch-diagram .arrow { stroke: var(--primary-color); stroke-width: 1.5; marker-end: url(#arrowhead); fill: none; }
+        .arch-diagram .arrow.dashed { stroke-dasharray: 4, 3; stroke: var(--tertiary-color); }
+        .arch-diagram .arrow.direct { stroke: #cccccc; }
+        .arch-diagram .arrow.storage { stroke: #8888ff; stroke-dasharray: 2, 2; } /* For localStorage */
+        .arch-diagram .arrow-label { fill: var(--primary-color); font-size: 10px; text-anchor: middle; }
+        .arch-diagram .arrow-label.state { fill: var(--tertiary-color); }
+        .arch-diagram .arrow-label.ai { fill: var(--secondary-color); }
+        .arch-diagram .arrow-label.direct { fill: #cccccc; }
+        .arch-diagram .arrow-label.storage { fill: #8888ff; }
+
+
+        .path {
+            font-family: monospace;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2px 5px;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+            word-break: break-all;
+        }
+        .code-reference { /* Style for referencing code files/functions */
+            font-family: monospace;
+            color: #c0c0ff;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <h1><i class="fas fa-project-diagram"></i>IdeActuator Demo (SVM_net) - 架构深度解析 v3.2 (AI Chat History Integration)</h1>
+
+        <section>
+            <h2><i class="fas fa-info-circle"></i>1. 引言: 统一状态与增强交互</h2>
+            <p>欢迎阅读 IdeActuator Demo (代号 SVM_net) 架构文档的 v3.2 版本。此版本记录了在 v3.1 引入 <code class="code-reference">WorldStateContext</code> 集中管理状态、AI 语言选择功能和专门处理代码输入类任务的 <code class="code-reference">CodeEntryTaskPanel</code> 组件的基础上，进一步增强交互性的改进：整合了 <strong class="concept-term">AI 聊天历史记录</strong> 功能。目标是确保即使是第一条 AI 消息也包含之前的聊天历史记录，以保持对话的连续性。然而，当前实现对于由脚本 (<code class="code-reference">ScriptParser</code>) 初始化的 <code class="inline">aiDialogue</code> 步骤，历史记录传递可能仍存在问题。本文档旨在精确反映当前实现，重点关注这一新功能如何融入现有架构，并指出潜在的改进领域。</p>
+            <p>我们将继续深入探讨各组件的角色、它们之间基于当前代码的实际联系，以及数据如何在系统中流动，特别关注新的聊天历史记录整合机制和多语言 AI 交互。</p>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-lightbulb"></i>2. 核心设计哲学: 事件驱动 + 集中状态 + 专门化 UI</h2>
+            <p>SVM_net 的核心仍然是<strong class="concept-term">事件驱动</strong>与<strong class="concept-term">集中式状态管理</strong>相结合，并在此基础上增加了<strong class="concept-term">专门化的任务 UI 组件</strong>和对<strong class="concept-term">AI 聊天历史记录整合</strong>的尝试。</p>
+            <ul>
+                <li><strong>事件驱动通信:</strong> 组件间依然通过发布/订阅事件进行解耦通信 (<code class="code-reference">EventService</code>)。用户交互（包括代码输入任务的完成）、脚本步骤、状态变更等仍然通过事件触发后续逻辑。</li>
+                <li><strong>集中状态管理 (<code class="code-reference">WorldStateContext</code>):</strong> 核心世界状态（<code class="inline">svms</code>, <code class="inline">activeTask</code>, <code class="inline">player</code>）由 <code class="code-reference">WorldStateContext</code> 统一管理和持久化。它现在也负责在状态更新后发布相应的<strong class="concept-term">状态变更事件</strong>（如 <code class="inline">player_inventory_updated</code>）。</li>
+                <li><strong>状态读取:</strong> 需要访问世界状态的组件通过 <code class="inline">useWorldStateContext()</code> Hook 获取一致的状态数据。</li>
+                <li><strong>状态更新 (事件驱动):</strong> 脚本通过发布 <code class="inline">requestWorldStateUpdate</code> 事件请求状态变更，由 <code class="code-reference">WorldStateContext</code> 处理。</li>
+                <li><strong>专门化任务 UI:</strong>
+                    <ul>
+                        <li><code class="code-reference">TaskOfferPanel</code>: 处理标准任务的接受/拒绝，通过 <code class="inline">notifyScript</code> 发送 <code class="inline">branchChoice</code> 事件。</li>
+                        <li><code class="code-reference">CodeEntryTaskPanel</code>: 处理需要代码输入的特定任务类型 (<code class="inline">CODE_ENTRY</code>)，在完成时直接通过 <code class="inline">publish</code> 发送 <code class="inline">task_outcome</code> 事件（包含 <code class="inline">taskId</code> 和 <code class="inline">outcome: 'success' | 'failure'</code>）。</li>
+                    </ul>
+                </li>
+                 <li><strong>多语言 AI:</strong> <code class="code-reference">App.jsx</code> 管理用户选择的语言状态，并通过 <code class="code-reference">AIContext</code> 将其传递给 AI 服务，以获取相应语言的回复。</li>
+                 <li><strong>AI 聊天历史记录整合:</strong> <code class="code-reference">EventService</code> 在处理 <code class="inline">requestAIDialogue</code> 事件时，会尝试使用事件数据中提供的 <code class="inline">history</code> 字段。然而，<code class="code-reference">ScriptParser</code> 在发布此类事件时目前固定传递一个空的历史记录数组，这导致脚本驱动的 AI 对话的第一条消息缺乏历史上下文。</li>
+            </ul>
+            <div class="rationale">
+                <strong><i class="fas fa-check-circle"></i>新架构的优势与挑战:</strong>
+                <ul>
+                    <li>保持了 v3.1 的单一数据源、清晰状态变更流程、可测试性、易持久化等优点。</li>
+                    <li>通过专门的 <code class="code-reference">CodeEntryTaskPanel</code>，使得特定类型的任务交互逻辑更清晰。</li>
+                    <li>增加了 AI 语言选择功能，提升了用户体验。</li>
+                    <li>AI 聊天历史记录的整合尝试旨在提升对话连贯性，但当前实现对脚本驱动对话的支持尚不完善。</li>
+                    <li><code class="code-reference">WorldStateContext</code> 发布状态变更事件，增强了系统的响应性。</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-puzzle-piece"></i>3. 架构的基石: 核心概念详解 (v3.2 更新)</h2>
+
+            <div class="component">
+                <h3><i class="fas fa-file-code"></i>3.1 脚本 (YAML): 交互剧本 (v3.2 更新)</h3>
+                <p><strong>角色定位 & 实现方式:</strong> 基本不变。</p>
+                <p><strong>核心作用 (v3.2 代码体现)：</strong></p>
+                <ul>
+                    <li>流程定义、叙事驱动、任务管理等作用不变。</li>
+                    <li><strong>状态变更请求:</strong> <code class="inline">type: updateWorldState</code> 步骤发布 <code class="inline">requestWorldStateUpdate</code> 事件。</li>
+                    <li><strong>条件分支:</strong> <code class="inline">type: branch</code> 步骤依赖传入的 <code class="inline">worldState</code> 或 <code class="inline">eventData</code> 进行判断。</li>
+                    <li><strong>等待事件 (增强):</strong> <code class="inline">type: waitForEvent</code> 步骤现在可以等待由 UI 组件或状态管理器发布的事件。</li>
+                    <li><strong>任务触发:</strong> 脚本可以通过 <code class="inline">type: taskOffer</code> 步骤提供任务。</li>
+                    <li><strong>AI 对话请求:</strong> <code class="inline">type: aiDialogue</code> 步骤通过 <code class="code-reference">ScriptParser</code> 发布 <code class="inline">requestAIDialogue</code> 事件。当前实现中，<code class="code-reference">ScriptParser</code> 会为这个事件附加一个空的 <code class="inline">history: []</code> 数组。</li>
+                </ul>
+                 <p><span class="status status-partial">状态：核心实现，AI 聊天历史记录对脚本驱动对话支持不完整</span></p>
+            </div>
+
+             <div class="component">
+                <h3><i class="fas fa-database"></i>3.2 世界状态 (World State): 集中管理与事件发布 (v3.2 更新)</h3>
+                <p><strong>角色定位：</strong> 集中式“集体记忆”，由 <code class="code-reference">WorldStateContext.jsx</code> 管理。</p>
+                <p><strong>实现方式 (<code class="code-reference">WorldStateContext.jsx</code>)：</strong></p>
+                <ul>
+                    <li>使用 React Context API 和 <code class="inline">useState</code> 管理内部状态。</li>
+                    <li>使用 <code class="inline">useEffect</code> 进行 <code class="inline">localStorage</code> 持久化。</li>
+                    <li>通过 <code class="inline">useEffect</code> 订阅 <code class="inline">requestWorldStateUpdate</code> 事件。</li>
+                    <li><strong>事件发布:</strong> 在状态更新后发布相应的状态变更事件。</li>
+                </ul>
+                <p><strong>核心作用 (v3.2 实现)：</strong></p>
+                <ul>
+                    <li>单一数据源、驱动渲染、支撑逻辑、执行状态变更请求、提供直接操作接口、持久化等作用不变。</li>
+                    <li><strong>发布状态变更:</strong> 使其他系统能够响应状态变化。</li>
+                </ul>
+                 <p><span class="status status-implemented">状态：核心实现 (增加事件发布)</span></p>
+            </div>
+
+            <div class="component">
+                <h3><i class="fas fa-bolt"></i>3.3 事件 (Events): 通信信号 (v3.2 更新)</h3>
+                <p><strong>角色定位 & 实现方式:</strong> 保持不变。</p>
+                <p><strong>核心作用 (v3.2 代码体现)：</strong></p>
+                <ul>
+                    <li>触发脚本、推进脚本、同步脚本状态等作用不变。</li>
+                    <li><code class="inline">requestWorldStateUpdate</code>: 由脚本发布，由 WorldStateContext 处理。</li>
+                    <li><strong>状态变更事件:</strong> 如 <code class="inline">player_inventory_updated</code>。由 WorldStateContext 发布。</li>
+                    <li><strong>任务交互事件:</strong> <code class="inline">branchChoice</code>, <code class="inline">task_outcome</code>。</li>
+                    <li>AI 相关事件 (<code class="inline">requestAIDialogue</code>, <code class="inline">aiDialogueReady</code> 等)。<code class="inline">requestAIDialogue</code> 事件的 <code class="inline">data.history</code> 字段由 <code class="code-reference">EventService</code> 用于传递给 AI。</li>
+                </ul>
+                 <p><span class="status status-implemented">状态：核心实现，事件类型更丰富</span></p>
+            </div>
+
+            <div class="component">
+                 <h3><i class="fas fa-map-marked-alt"></i>3.4 地图视图 (MapView): 消费世界状态</h3>
+                 <p><strong>角色定位 & 实现方式 & 核心作用:</strong> 与 v3.1 基本一致。</p>
+                 <p><span class="status status-implemented">状态：核心实现</span></p>
+            </div>
+
+            <div class="component">
+                 <h3><i class="fas fa-brain"></i>3.5 AI 服务 (AIService & AIContext): 支持多语言与聊天历史记录 (v3.2 更新)</h3>
+                 <p><strong>角色定位 & 实现方式:</strong> 基本不变，连接外部 LLM。</p>
+                 <p><strong>核心作用 (v3.2 代码体现)：</strong></p>
+                 <ul>
+                     <li><code class="code-reference">AIChatPanel.jsx</code> 从 <code class="code-reference">App.jsx</code> 接收 <code class="inline">language</code> prop。</li>
+                     <li><code class="code-reference">AIContext.js</code> 的 <code class="inline">getSystemPrompt</code> 函数接收 <code class="inline">language</code> 参数。</li>
+                     <li><code class="code-reference">AIService.js</code> 的 <code class="inline">getAIDialogueCompletion</code> 函数接收 <code class="inline">history</code> 参数。此历史记录来源于 <code class="code-reference">EventService</code> 处理 <code class="inline">requestAIDialogue</code> 事件时从事件数据中提取的 <code class="inline">data.history</code>。</li>
+                     <li>API Key 安全性问题依然存在。</li>
+                 </ul>
+                 <p><span class="status status-partial">状态：核心实现 (语言处理)，聊天历史记录整合部分有效</span></p>
+            </div>
+
+             <div class="component">
+                 <h3><i class="fas fa-tasks"></i>3.6 任务面板 (TaskOfferPanel & CodeEntryTaskPanel): 专门化交互 (v3.2 更新)</h3>
+                 <p><strong>角色定位：</strong> 提供不同类型的任务交互界面。</p>
+                 <p><strong>实现方式：</strong> 与 v3.1 基本一致。</p>
+                 <p><strong>核心作用 (v3.2 实现)：</strong> 与 v3.1 基本一致。</p>
+                  <p><span class="status status-implemented">状态：核心实现</span></p>
+            </div>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-cogs"></i>4. 核心引擎与协调器 (v3.2 更新)</h2>
+
+             <div class="component">
+                <h3><i class="fas fa-network-wired"></i>4.1 EventService: 事件中枢 (v3.2 更新)</h3>
+                <p><strong>角色定位：</strong> 中央交通枢纽和脚本生命周期管理员。</p>
+                <p><strong>核心职责详解 (v3.2 代码更新)：</strong></p>
+                <ul>
+                    <li>事件监听、广播、脚本触发、引擎管理、异步队列机制基本不变。</li>
+                    <li>处理更多类型的事件。</li>
+                    <li><strong>AI 聊天历史记录整合:</strong> 在 <code class="inline">processAIDialogue</code> 函数中，使用 <code class="inline">requestAIDialogue</code> 事件数据中的 <code class="inline">data.history || []</code> 作为传递给 <code class="code-reference">AIService</code> 的历史记录。</li>
+                </ul>
+                 <p><span class="status status-partial">状态：核心实现，AI 聊天历史记录整合依赖事件数据</span></p>
+            </div>
+
+            <div class="component">
+                <h3><i class="fas fa-microchip"></i>4.2 ScriptParser: 剧本执行者 (v3.2 更新)</h3>
+                <p><strong>角色定位：</strong> 解释和执行单个 YAML 脚本。</p>
+                <p><strong>核心职责详解 (v3.2 代码更新)：</strong></p>
+                <ul>
+                    <li>初始化、基本事件响应、状态推进、结束判断逻辑不变。</li>
+                    <li>`updateWorldState` 步骤处理: 发布 `requestWorldStateUpdate` 事件。</li>
+                    <li>`branch` 步骤处理: 依赖传入的 `worldState` 或 `eventData`。</li>
+                    <li>`waitForEvent` 步骤处理 (增强): 正确处理等待各类事件。</li>
+                    <li><strong>AI 聊天历史记录整合:</strong> 在处理 <code class="inline">aiDialogue</code> 类型的步骤并发布 <code class="inline">requestAIDialogue</code> 事件时，当前固定附加一个空的 <code class="inline">history: []</code> 数组到事件数据中。</li>
+                </ul>
+                 <p><span class="status status-partial">状态：核心实现，AI 聊天历史记录对脚本驱动对话支持不完整</span></p>
+            </div>
+
+             <div class="component">
+                <h3><i class="fas fa-link"></i>4.3 ScriptContext: 脚本状态桥梁</h3>
+                 <p><strong>角色定位 & 实现方式 & 核心职责:</strong> 与 v3.1 保持一致。</p>
+                 <p><span class="status status-implemented">状态：核心实现</span></p>
+            </div>
+
+             <div class="component">
+                <h3><i class="fas fa-desktop"></i>4.4 UI 组件 & App.jsx: 消费与协调 (v3.2 更新)</h3>
+                <p><strong>角色定位：</strong> 呈现信息，捕捉输入，协调面板显示。</p>
+                <p><strong>核心职责详解 (v3.2 代码体现)：</strong></p>
+                <ul>
+                    <li><strong>消费状态:</strong> 继续使用双 Context 获取脚本和世界状态。</li>
+                    <li><strong>条件渲染 (增强):</strong> <code class="code-reference">App.jsx</code> 负责任务面板的条件渲染。</li>
+                    <li><strong>发布事件/调用操作:</strong> 各面板按既定方式发布事件。</li>
+                    <li><strong>语言状态管理:</strong> <code class="code-reference">App.jsx</code> 管理语言选择。</li>
+                    <li><strong>UI 增强:</strong> <code class="code-reference">AIChatContainer.jsx</code> 更新，在角色列表中显示头像，提升聊天界面的视觉效果。</li>
+                </ul>
+                 <p><span class="status status-implemented">状态：核心实现，UI 增强</span></p>
+            </div>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-project-diagram"></i>5. 核心交互流程 (SVG 图示 - v3.2 更新)</h2>
+            <div class="diagram-container">
+                <h3><i class="fas fa-exchange-alt"></i>架构交互概览 (v3.2)</h3>
+                <pre class="mermaid">
+graph LR
+    subgraph "Browser UI (React)"
+        App[App.jsx<br>Providers, Triggers, View/Lang/Task State]
+        MapView[MapView]
+        AIChatPanel[AIChatPanel<br>Manages persona chat history]
+        TaskOfferPanel[TaskOfferPanel]
+        CodeEntryPanel[CodeEntryTaskPanel]
+        OtherUI[Other UI<br>Navbar, Profile, etc.]
+        ScriptCtx[ScriptContext<br>Tracks Script Progress]
+        WorldCtx[WorldStateContext<br>Manages Game State]
+    end
+
+    subgraph "Core Logic"
+        EventSvc[EventService<br>Pub/Sub, Queue, Engine Mgmt]
+        ScriptEng[ScriptParser Instances<br>Executes Scripts]
+        ScriptsYAML[YAML Scripts<br>Define Flows]
+    end
+
+    subgraph "External Services & Storage"
+        MapboxAPI([Mapbox API])
+        LLM_API([LLM API])
+        AISvc[AIService<br>LLM Integration]
+        AICtx[AIContext<br>Prompt Engineering w/ Lang]
+        LocalStorage([LocalStorage])
+    end
+
+    %% Data & Event Flow
+    App -->|Triggers Publish| EventSvc
+    App -->|Triggers Activate| EventSvc
+    App -->|Manages Visibility based on Script Step| TaskOfferPanel
+    App -->|Manages Visibility based on executingTaskId| CodeEntryPanel
+    App -->|Passes Lang| AIChatPanel
+
+    MapView -->|Select SVM| App
+    MapView -->|Uses| MapboxAPI
+    OtherUI -->|Change View| App
+
+    TaskOfferPanel -->|Calls notifyScript branchChoice| EventSvc
+    CodeEntryPanel -->|Calls publish task_outcome| EventSvc
+    CodeEntryPanel -->|Calls onClose handleCodeEntryClose| App
+
+    AIChatPanel -->|Calls notifyScript dialogueClosed| EventSvc
+    AIChatPanel -->|User sends msg, calls| AISvc %% User-initiated chat likely has history
+    AIChatPanel -->|Gets Context| AICtx
+
+    EventSvc -->|Activates/Notifies| ScriptEng
+    EventSvc -->|Loads| ScriptsYAML
+    EventSvc -->|Publishes scriptStep/Fin| ScriptCtx
+    EventSvc -->|Publishes reqWorldStateUpd| WorldCtx
+    EventSvc -->|Publishes aiDialogueReady| AIChatPanel
+    EventSvc -->|Forwards task_outcome| ScriptEng
+    EventSvc -->|Forwards inventory_updated| ScriptEng
+    EventSvc -->|processAIDialogue (uses event.data.history)| AISvc
+
+    ScriptEng -->|Reads| ScriptsYAML
+    ScriptEng -->|Publishes reqWorldStateUpd| EventSvc
+    ScriptEng -->|Publishes reqAIDialogue (history:[])| EventSvc %% Script-initiated dialogue
+    ScriptEng -->|Waits for task_outcome, inventory_updated, etc.| EventSvc
+
+    ScriptCtx -->|Updates UI State| App
+    WorldCtx -->|Updates UI State| App
+    WorldCtx <-->|Save/Load| LocalStorage
+    WorldCtx -->|Publishes state changes e.g. inventory_updated| EventSvc
+    WorldCtx -->|Handles reqWorldStateUpd| WorldCtx
+
+
+    AISvc -->|Calls| LLM_API
+    AISvc -->|Publishes aiDialogueReady/aiDecisionResult| EventSvc
+
+    AICtx -->|Reads| WorldCtx
+    AICtx -->|Reads| ScriptCtx
+
+    %% Styling
+    style EventSvc fill:#f9d,stroke:#333
+    style ScriptCtx fill:#ccf,stroke:#333
+    style WorldCtx fill:#cdf,stroke:#333,stroke-width:2px
+    style LocalStorage fill:#aaa,stroke:#333
+    style CodeEntryPanel fill:#fec,stroke:#333
+    style AIChatPanel fill:#cfc,stroke:#333
+</pre>
+            </div>
+            <p>*(注意: 上图简化了所有可能的交互，重点展示了核心组件及其主要通信路径。脚本驱动的 AI 对话历史记录传递仍是薄弱环节。)*</p>
+        </section>
+
+         <section>
+            <h2><i class="fas fa-stream"></i>6. 示例流程: SVM-05 数据窃取 (部分 - 获取黑客工具)</h2>
+            <p>为了更具体地说明组件如何交互，我们追踪“获取 CorpSec 黑客工具”这一子流程（假设 AI 对话历史记录问题依然存在）：</p>
+            <ol class="detailed-flow">
+                <li><span class="flow-ui">用户</span> 关闭了 <span class="flow-component">AIChatPanel</span> 中来自脚本步骤 10 的对话。</li>
+                <li><span class="flow-component">AIChatPanel</span> 调用 <code class="flow-code">notifyScript('svm05_data_heist_main', 'dialogueClosed', {})</code>。</li>
+                <li><span class="flow-component">EventService</span> 将 <code class="flow-event">dialogueClosed</code> 事件和当前 <code class="flow-state">worldState</code> 传递给 <span class="flow-component">ScriptParser</span> (svm05_data_heist_main 实例)。</li>
+                <li><span class="flow-component">ScriptParser</span> 在步骤 10 收到 <code class="flow-event">dialogueClosed</code>，前进到 <code class="flow-code">nextStep: 11</code>。</li>
+                <li><span class="flow-component">EventService</span> 发布 <code class="flow-event">scriptStep</code> (包含步骤 11 的信息)。</li>
+                <li><span class="flow-component">ScriptParser</span> 在步骤 11 (branch) 收到 <code class="flow-event">scriptStep</code>。它使用传入的 <code class="flow-state">worldState</code> 检查玩家库存。假设玩家没有工具，条件为 false。</li>
+                <li><span class="flow-component">ScriptParser</span> 前进到 <code class="flow-code">nextStepOnFalse: 12</code>。</li>
+                <li><span class="flow-component">EventService</span> 发布 <code class="flow-event">scriptStep</code> (包含步骤 12 的信息)。</li>
+                <li><span class="flow-component">ScriptParser</span> 在步骤 12 (aiDialogue) 收到 <code class="flow-event">scriptStep</code>，发布 <code class="flow-event">requestAIDialogue</code> 事件，其中 <code class="flow-code">data.history</code> 为 <code class="flow-code">[]</code>。</li>
+                <li><span class="flow-component">EventService</span> 收到 <code class="flow-event">requestAIDialogue</code>，调用 <code class="flow-code">processAIDialogue</code>。</li>
+                <li><code class="flow-code">processAIDialogue</code> 调用 <code class="flow-component">AIService</code> 的 <code class="flow-code">getAIDialogueCompletion</code>，传递的 <code class="flow-code">history</code> 参数为 <code class="flow-code">[]</code>。</li>
+                <li><span class="flow-component">AIService</span> 处理请求，获取 AI 回复（此时 AI 没有历史上下文），发布 <code class="flow-event">aiDialogueReady</code>。</li>
+                <li><span class="flow-component">AIChatPanel</span> 显示步骤 12 的 AI 对话。</li>
+                <li><span class="flow-ui">用户</span> 关闭了 <span class="flow-component">AIChatPanel</span> 中来自步骤 12 的对话。</li>
+                <li><span class="flow-component">AIChatPanel</span> 调用 <code class="flow-code">notifyScript('svm05_data_heist_main', 'dialogueClosed', {})</code>。</li>
+                <li><span class="flow-component">ScriptParser</span> 在步骤 12 收到 <code class="flow-event">dialogueClosed</code>，前进到 <code class="flow-code">nextStep: 13</code>。</li>
+                <li><span class="flow-component">EventService</span> 发布 <code class="flow-event">scriptStep</code> (包含步骤 13 的信息)。</li>
+                <li><span class="flow-component">ScriptParser</span> 在步骤 13 (updateWorldState) 收到 <code class="flow-event">scriptStep</code>，发布 <code class="flow-event">requestWorldStateUpdate</code>。</li>
+                <li><span class="flow-component">WorldStateContext</span> 收到 <code class="flow-event">requestWorldStateUpdate</code>，更新 <code class="flow-state">activeTask</code>。</li>
+                <li><span class="flow-component">ScriptParser</span> 在步骤 13 完成后，前进到 <code class="flow-code">nextStep: 14</code>。</li>
+                <li><span class="flow-component">EventService</span> 发布 <code class="flow-event">scriptStep</code> (包含步骤 14 的信息)。</li>
+                <li><span class="flow-component">ScriptParser</span> 在步骤 14 (waitForEvent) 收到 <code class="flow-event">scriptStep</code>。脚本暂停，等待 <code class="flow-event">player_inventory_updated</code> 事件。</li>
+                <li><span class="flow-ui">用户</span> 导航到 SVM-7 视图 (<span class="flow-component">SvmDetailView</span>)。</li>
+                <li><span class="flow-ui">用户</span> 点击购买 "CorpSec Hacking Tool"。</li>
+                <li><span class="flow-component">SvmDetailView</span> 调用 <code class="flow-component">WorldStateContext</code> 的 <code class="flow-code">updatePlayerCredits</code> 和 <code class="flow-code">updatePlayerInventory</code>。</li>
+                <li><span class="flow-component">WorldStateContext</span> 的 <code class="flow-code">updatePlayerCredits</code> 更新状态并调用 <code class="flow-code">publishEvent('player_credits_updated', ...)</code>。</li>
+                <li><span class="flow-component">EventService</span> 收到 <code class="flow-event">player_credits_updated</code>，通知 <span class="flow-component">ScriptParser</span>。</li>
+                <li><span class="flow-component">ScriptParser</span> (在步骤 14) 收到 <code class="flow-event">player_credits_updated</code>，但事件名称不匹配，忽略。</li>
+                <li><span class="flow-component">WorldStateContext</span> 的 <code class="flow-code">updatePlayerInventory</code> 更新状态。其关联的 <code class="flow-code">useEffect</code> 检测到库存变化，调用 <code class="flow-code">publishEvent('player_inventory_updated', { addedItemId: 'hacking_tool_corpsec', ... })</code>。</li>
+                <li><span class="flow-component">EventService</span> 收到 <code class="flow-event">player_inventory_updated</code>，通知 <span class="flow-component">ScriptParser</span>。</li>
+                <li><span class="flow-component">ScriptParser</span> (在步骤 14) 收到 <code class="flow-event">player_inventory_updated</code>。事件名称匹配。</li>
+                <li><span class="flow-component">ScriptParser</span> 调用 <code class="flow-code">_evaluateConditionClause</code> 检查事件数据中的 <code class="flow-code">addedItemId</code> 是否为 'hacking_tool_corpsec'。条件满足。</li>
+                <li><span class="flow-component">ScriptParser</span> 前进到 <code class="flow-code">nextStep: 15</code>。</li>
+                <li><span class="flow-component">EventService</span> 发布 <code class="flow-event">scriptStep</code> (包含步骤 15 的信息)。</li>
+                <li>后续流程继续...</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-road"></i>7. 未来展望与挑战</h2>
+            <p>当前的 v3.2 架构在 v3.1 的基础上进行了迭代。未来的工作可以集中在：</p>
+            <ul>
+                <li><strong>完善 AI 聊天历史记录:</strong> 确保由脚本驱动的 <code class="inline">aiDialogue</code> 步骤也能正确获取和使用相关角色的完整聊天历史记录。这可能需要修改 <code class="code-reference">ScriptParser</code> 如何发布 <code class="inline">requestAIDialogue</code> 事件，或让 <code class="code-reference">EventService</code> 能够从 <code class="code-reference">WorldStateContext</code> 或其他地方获取特定角色的历史。</li>
+                <li><strong>AI Tool Calling:</strong> 实现 AI 主动查询状态或触发事件的能力。</li>
+                <li><strong>更丰富的脚本功能:</strong> 添加如计时器、资源检查、更复杂的任务类型等。</li>
+                <li><strong>UI/UX 优化:</strong> 改进视觉效果和交互流畅度。</li>
+                <li><strong>API Key 安全:</strong> 实现后端代理。</li>
+                <li><strong>测试覆盖:</strong> 增加单元测试和集成测试，特别是针对事件流和状态管理。</li>
+            </ul>
+        </section>
+
+    </div>
+
+    <!-- Mermaid JS -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+        // Custom theme variables could be applied here if needed
+        // mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: { ... } });
+    </script>
+</body>
+</html>

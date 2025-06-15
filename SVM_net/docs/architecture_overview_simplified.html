@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVM_net 项目运作方式 (简化版)</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.7;
+            margin: 20px;
+            background-color: #f0f2f5; /* Lighter background */
+            color: #333; /* Darker text */
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #0056b3; /* Blue headings */
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: none;
+            color: #003d7a; /* Darker blue for main title */
+        }
+        h2 {
+            margin-top: 35px;
+            margin-bottom: 15px;
+        }
+        h3 {
+            margin-top: 25px;
+            margin-bottom: 10px;
+            color: #007bff; /* Lighter blue for sub-subheadings */
+            border-bottom: none;
+        }
+        .component {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-left: 5px solid #007bff; /* Blue left border */
+            border-radius: 5px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .component h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+        ul {
+            padding-left: 20px;
+            list-style: disc;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        strong {
+            color: #003d7a;
+            font-weight: 600;
+        }
+        .analogy {
+            font-style: italic;
+            color: #555;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: block; /* Make it block level */
+            border: 1px dashed #ccc;
+        }
+        .status-note {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            display: block;
+        }
+        .highlight {
+             background-color: #e7f3ff; /* Light blue highlight */
+             padding: 1px 4px;
+             border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SVM_net 项目是如何运作的？ (通俗版)</h1>
+
+    <h2>引言：数字城市的游戏</h2>
+    <p>想象一下，我们正在构建一个未来城市的模拟游戏，里面有很多智能售货机 (SVM)。这个项目 (SVM_net) 就是这个游戏的“大脑”和“眼睛”的一部分。它负责处理游戏中发生的各种事件（比如一个售货机坏了），并引导玩家（也就是你）通过一系列对话和任务来解决问题。这份文档用简单的语言解释这个“大脑”是如何工作的。</p>
+
+    <h2>核心运作方式：像电影剧组一样工作</h2>
+    <p>整个系统的工作方式有点像一个电影剧组：</p>
+    <ul>
+        <li>有<strong>剧本 (Scripts)</strong>，规定了故事怎么发展。</li>
+        <li>有一个<strong>总导演 (Event Service)</strong>，负责协调所有事情，知道什么时候该做什么。</li>
+        <li>有一个<strong>执行导演 (Script Engine / Parser)</strong>，专门负责读懂某一个剧本，并告诉演员该到哪一步了。</li>
+        <li>有<strong>演员 (UI Components)</strong>，负责在屏幕上表演（显示地图、对话框、按钮等），并把观众（用户）的反应告诉总导演。</li>
+        <li>有一个<strong>场记板 (State Contexts)</strong>，记录着当前拍到哪一幕（脚本进度）以及场景里的重要信息（世界状态，比如哪个售货机是好的）。</li>
+        <li>还有一个<strong>AI 助手 (AI Chat)</strong>，可以和用户聊天，并且正在学习了解片场（游戏世界）的情况。</li>
+    </ul>
+
+    <h2>主要部件介绍</h2>
+
+    <div class="component">
+        <h3>1. 剧本 (Scripts - YAML 文件)</h3>
+        <p><strong>作用：</strong> 这些是用一种叫 YAML 的简单格式写成的文件，就像电影剧本一样，详细规定了特定事件（比如“SVM-03 异常”）发生后，应该出现什么对话、提供什么任务、等待玩家做什么等等。</p>
+        <p><strong>特点：</strong> 相对容易阅读和修改，即使不太懂编程也能看懂大概流程。</p>
+        <span class="analogy"><strong>类比：</strong> 电影或戏剧的剧本，规定了情节、台词和场景转换。</span>
+    </div>
+
+    <div class="component">
+        <h3>2. 总导演 (Event Service - 事件服务)</h3>
+        <p><strong>作用：</strong> 这是整个系统的信息中枢和协调者。</p>
+        <ul>
+            <li><strong>接收信号：</strong> 当游戏里发生任何事（比如玩家点击按钮、某个“剧本”进行到下一步），都会通知“总导演”。</li>
+            <li><strong>分发任务：</strong> “总导演”知道哪些“演员”（UI 组件）或“执行导演”（脚本引擎）关心某个信号，然后把信号发给它们。</li>
+            <li><strong>管理剧本执行：</strong> 它知道当前有哪些“剧本”正在上演，当某个剧本需要开始时，它会找一个“执行导演”来负责。当剧本演完时，它也会记录下来。</li>
+        </ul>
+        <span class="analogy"><strong>类比：</strong> 电影的总导演或片场的调度员，负责接收所有信息，并告诉每个部门（演员、执行导演等）该做什么。</span>
+    </div>
+
+    <div class="component">
+        <h3>3. 执行导演 (Script Engine / Parser - 脚本引擎/解析器)</h3>
+        <p><strong>作用：</strong> 专门负责理解和执行某一个“剧本”。</p>
+        <ul>
+            <li><strong>读剧本：</strong> 它拿到一个剧本后，能读懂里面的每一个步骤。</li>
+            <li><strong>按指令推进：</strong> 当“总导演”告诉它某个相关的信号来了（比如玩家点击了“继续”），它会根据剧本的指示，决定下一步该做什么（比如显示下一句对话，或者提供一个任务）。</li>
+            <li><strong>报告进度：</strong> 它会告诉“总导演”自己当前进行到剧本的哪一步了。</li>
+        </ul>
+        <span class="analogy"><strong>类比：</strong> 电影的执行导演，专注于一个具体的场景或剧本段落，指导演员完成当前步骤，并准备下一步。</span>
+    </div>
+
+    <div class="component">
+        <h3>4. 演员 (UI Components - 界面组件)</h3>
+        <p><strong>作用：</strong> 用户直接看到和交互的部分。</p>
+        <ul>
+            <li><strong>表演：</strong> 根据“场记板”上的信息，显示对应的界面，比如在地图上标出售货机、弹出对话框、显示任务面板等。</li>
+            <li><strong>反馈：</strong> 当用户进行操作（点击地图、按钮等）时，“演员”会立刻把这个信息报告给“总导演”。</li>
+        </ul>
+        <span class="analogy"><strong>类比：</strong> 电影中的演员和布景，负责呈现故事内容，并对导演的指令（来自场记板的信息）做出反应。用户的点击就像是观众的互动，演员需要报告给导演。</span>
+    </div>
+
+    <div class="component">
+        <h3>5. 场记板 (State Contexts - 状态上下文)</h3>
+        <p><strong>作用：</strong> 记录当前重要信息的地方，所有“演员”都能看到。</p>
+        <ul>
+            <li><strong>脚本进度板 (Script Context):</strong> 记录当前正在上演哪些“剧本”，以及每个剧本进行到哪一步了。</li>
+            <li><strong>世界信息板 (World State Context):</strong> 记录游戏世界里的状态，比如哪些售货机在线/离线、玩家当前接受了什么任务等。<span class="status-note">（状态：我们最近刚建立了这个板子，并把售货机状态和玩家任务信息记在了上面，但还有些信息分散在别处，需要逐步统一过来。）</span></li>
+        </ul>
+        <p><strong>如何更新：</strong> “总导演”在收到“执行导演”的进度报告后，会更新“脚本进度板”。当需要改变世界状态时（比如任务完成，修好了售货机），会更新“世界信息板”。</p>
+        <span class="analogy"><strong>类比：</strong> 电影片场的场记板或通告板，上面写着当前拍摄场景、进度以及场景内需要注意的关键信息（道具状态等）。所有演员和工作人员都可以看这个板来了解情况。</span>
+    </div>
+
+    <div class="component">
+        <h3>6. AI 助手 (AI Chat)</h3>
+        <p><strong>作用：</strong> 一个可以和玩家聊天的智能助手 (名叫 Nova)。</p>
+        <ul>
+            <li><strong>聊天：</strong> 可以和玩家进行自由对话。</li>
+            <li><strong>获取信息：</strong> 它现在可以“看到”“世界信息板”和“脚本进度板”上的信息了！这意味着，如果你问它某个售货机的情况或者当前正在执行什么任务，它应该能根据这些信息来回答你。</li>
+        </ul>
+        <span class="status-note">（状态：基础聊天功能可用，并且现在能获取游戏状态和脚本进度信息来回答问题了。但让它主动参与或影响游戏流程的功能还在计划中。）</span>
+        <span class="analogy"><strong>类比：</strong> 剧组里的顾问或资料员，可以回答关于背景设定的问题，并且现在也能知道当前的拍摄进度和场景信息了。</span>
+    </div>
+
+    <h2>总结：它们如何协同工作？</h2>
+    <p>简单来说：</p>
+    <ol>
+        <li>某个<strong>事件</strong>发生（比如玩家点击，或系统触发）。</li>
+        <li><strong>总导演 (Event Service)</strong> 收到信号，可能会让一个<strong>执行导演 (Script Parser)</strong> 开始读一个新<strong>剧本 (Script)</strong>，或者把信号发给正在读剧本的执行导演。</li>
+        <li><strong>执行导演</strong>根据剧本和收到的信号，决定进行到哪一步，并把新进度报告给<strong>总导演</strong>。</li>
+        <li><strong>总导演</strong>更新<strong>场记板 (State Contexts)</strong> 上的进度信息。</li>
+        <li><strong>演员 (UI Components)</strong> 看到场记板上的信息变了，就更新自己的表演（比如显示新的对话框或任务）。</li>
+        <li>如果需要，<strong>AI 助手</strong>在回答问题时，也会参考场记板上的信息。</li>
+    </ol>
+    <p>这个流程不断循环，通过事件驱动，让游戏故事得以进行，并响应玩家的操作。</p>
+
+</body>
+</html>

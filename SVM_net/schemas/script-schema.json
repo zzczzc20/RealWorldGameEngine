@@ -1,0 +1,162 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SVM_net Script Schema",
+  "description": "Schema for validating SVM_net script YAML files.",
+  "type": "object",
+  "required": ["scriptId", "title", "steps"],
+  "properties": {
+    "scriptId": {
+      "description": "Unique identifier for the script.",
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "title": {
+      "description": "Human-readable title for the script.",
+      "type": "string",
+      "minLength": 3
+    },
+    "trigger": {
+      "description": "Condition that starts the script.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["event", "taskComplete", "interaction", "manual"]
+        },
+        "eventName": {
+          "description": "Name of the event to listen for (if type is 'event').",
+          "type": "string"
+        },
+        "taskId": {
+          "description": "ID of the task completion to listen for (if type is 'taskComplete').",
+          "type": "number"
+        },
+        "interactionTarget": {
+           "description": "Identifier for the interaction target (if type is 'interaction').",
+           "type": "string"
+        }
+      },
+      "required": ["type"]
+    },
+    "steps": {
+      "description": "Array of steps that make up the script.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/step"
+      }
+    }
+  },
+  "definitions": {
+    "step": {
+      "type": "object",
+      "required": ["stepId", "type"],
+      "properties": {
+        "stepId": {
+          "description": "Unique identifier for the step within the script.",
+          "type": "number"
+        },
+        "type": {
+          "description": "The type of action this step performs.",
+          "type": "string",
+          "enum": ["dialogue", "taskOffer", "updateWorldState", "waitForEvent", "branch", "endScript"]
+        },
+        "nextStep": {
+          "description": "ID of the next step to execute.",
+          "type": "number"
+        },
+        "endScript": {
+           "description": "If true, ends the script execution after this step.",
+           "type": "boolean"
+        }
+      },
+      "oneOf": [
+        { "$ref": "#/definitions/dialogueStep" },
+        { "$ref": "#/definitions/taskOfferStep" },
+        { "$ref": "#/definitions/updateWorldStateStep" },
+        { "$ref": "#/definitions/waitForEventStep" },
+        { "$ref": "#/definitions/branchStep" },
+        { "$ref": "#/definitions/endScriptStep" }
+      ]
+    },
+    "dialogueStep": {
+      "properties": {
+        "type": { "const": "dialogue" },
+        "character": { "type": "string", "description": "Character speaking (e.g., 'Nova')." },
+        "text": { "type": "string", "description": "The dialogue text." }
+      },
+      "required": ["character", "text"]
+    },
+    "taskOfferStep": {
+      "properties": {
+        "type": { "const": "taskOffer" },
+        "task": {
+          "type": "object",
+          "properties": {
+            "taskId": { "type": ["number", "string"] },
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "relatedSvmId": { "type": "number" },
+            "reward": { "type": "number" },
+            "difficulty": { "type": "string" },
+            "type": { "type": "string" }
+          },
+          "required": ["taskId", "title", "description"]
+        },
+        "nextStepOnAccept": { "type": "number" },
+        "nextStepOnDecline": { "type": "number" }
+      },
+      "required": ["task"]
+    },
+    "updateWorldStateStep": {
+      "properties": {
+        "type": { "const": "updateWorldState" },
+        "target": { "type": "string", "enum": ["svm", "player", "faction"] },
+        "id": { "type": ["number", "string"] },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "property": { "type": "string" },
+              "value": {}
+            },
+            "required": ["property", "value"]
+          }
+        }
+      },
+      "required": ["target", "changes"]
+    },
+    "waitForEventStep": {
+      "properties": {
+        "type": { "const": "waitForEvent" },
+        "eventName": { "type": "string" }
+      },
+      "required": ["eventName"]
+    },
+    "branchStep": {
+      "properties": {
+        "type": { "const": "branch" },
+        "condition": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["checkWorldState", "checkPlayerInventory"] },
+            "target": { "type": "string" },
+            "id": { "type": ["number", "string"] },
+            "property": { "type": "string" },
+            "value": {}
+          },
+          "required": ["type", "property", "value"]
+        },
+        "nextStepOnTrue": { "type": "number" },
+        "nextStepOnFalse": { "type": "number" }
+      },
+      "required": ["condition", "nextStepOnTrue", "nextStepOnFalse"]
+    },
+    "endScriptStep": {
+       "properties": {
+         "type": { "const": "endScript" }
+       }
+    }
+  }
+}
