@@ -166,6 +166,7 @@ steps:
     audio: /assets/audio/memory.mp3
     bgm: /assets/audio/bgm_2.mp3
     persona: "Protagonist_Internal"
+    image: /assets/images/phone.png
     nextStep: wake_up2
     
   - stepId: wake_up2
@@ -174,7 +175,22 @@ steps:
     persona: "Protagonist_Internal"
     image: /assets/images/woman.png
     bgm: /assets/audio/bgm_1.mp3
+    choices:
+      - text: "查看手机信息" # 选项显示的文本
+        nextStep: wake_up3 # 选择后跳转的步骤ID
+      - text: "忽略手机震动"
+        nextStep: wake_up2_1
     nextStep: wake_up3
+
+  - stepId: wake_up2_1
+    type: dialogue
+    text: "我尝试忽略手机震动，但是手机震动越来越强烈，我不得不打开手机查看信息。"
+    persona: "Protagonist_Internal"
+    image: /assets/images/woman.png
+    bgm: /assets/audio/bgm_1.mp3
+    nextStep: wake_up3
+
+
     
   - stepId: wake_up3
     type: updateWorldState
