@@ -1,6 +1,7 @@
 # IdeActuator Demo (SVM_net) ✨
 
-Welcome to the IdeActuator Demo (SVM_net) project! This is a frontend prototype exploring the vision of transforming urban spaces into interactive game worlds using AI, smart devices (like simulated Smart Vending Machines - SVMs), mobile interfaces, and game mechanics.
+Welcome to the IdeActuator Demo (SVM_net) project! This is a frontend prototype (with a simple flask backend) exploring the vision of transforming urban spaces into interactive game worlds using AI, smart devices (like simulated Smart Vending Machines - SVMs), mobile interfaces, and game mechanics.
+If you are interested in it, please contact me with my email: zzhouch@connect.ust.hk
 
 **Vision:** To create engaging, location-based experiences that blend the virtual and real, making the city itself a playground.
 
@@ -27,7 +28,7 @@ Welcome to the IdeActuator Demo (SVM_net) project! This is a frontend prototype 
 *   **Specialized Task Panels:**
     *   `TaskOfferPanel`: Displays standard task offers with Accept/Decline options.
     *   `CodeEntryTaskPanel`: Handles specific tasks requiring code input (e.g., hacking, data extraction), publishing `task_outcome` events (success/failure).
-*   **Core Gameplay Loop Demo:** The `svm03_anomaly.yaml` and `svm05_data_heist_main.yaml` scripts demonstrate triggering, dialogue, task offering (standard and code entry), state updates, event waiting, and branching.
+*   **Core Gameplay Loop Demo:** The `HK_2085_Love_Isaac.yaml` script demonstrate triggering, dialogue, task offering (standard and code entry), state updates, event waiting, and branching.
 *   **Puzzle System:** Implements a comprehensive puzzle system with clue logs and interactive elements for engaging gameplay.
 *   **Map Navigation:** Provides navigational aids to enhance location-based interactions within the game world.
 
