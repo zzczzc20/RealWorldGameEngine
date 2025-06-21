@@ -81,13 +81,23 @@ function ChatWindow({
   };
 
   const handleContinue = () => {
-    if (activeScriptId && currentScriptStep && (currentScriptStep.type === 'dialogue' || currentScriptStep.type === 'aiDialogue')) {
-      notifyScript(activeScriptId, 'dialogueClosed', {});
-      if (currentScriptStep.type === 'aiDialogue' && persona) {
-        publish('userInputUpdated', { input: '', persona: persona.id });
+    const proceed = () => {
+      if (activeScriptId && currentScriptStep) {
+        notifyScript(activeScriptId, 'dialogueClosed', {});
+        if (currentScriptStep.type === 'aiDialogue' && persona) {
+          publish('userInputUpdated', { input: '', persona: persona.id });
+        }
+      } else {
+        console.warn("Continue clicked but no active dialogue or aiDialogue step found.");
       }
-    } else {
-      console.warn("Continue clicked but no active dialogue or aiDialogue step found.");
+    };
+
+    if (currentScriptStep?.type === 'aiDialogue') {
+      if (window.confirm("您确定要结束与AI的对话吗？")) {
+        proceed();
+      }
+    } else if (currentScriptStep?.type === 'dialogue') {
+      proceed();
     }
   };
 

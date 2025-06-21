@@ -18,13 +18,26 @@ return {};
 let initialActiveEnginesFromStorage = new Map(); // For Stage C: Store initial progress from ScriptContext
 
 // For Stage C: Function for ScriptContext to register initial loaded progress
-export function registerInitialActiveEngines(enginesMap) {
-if (enginesMap instanceof Map) {
-initialActiveEnginesFromStorage = enginesMap;
-console.log("[EventService] Initial active engines from storage registered:", initialActiveEnginesFromStorage);
-} else {
-console.warn("[EventService] registerInitialActiveEngines received non-Map data:", enginesMap);
-}
+export function registerInitialActiveEngines(initialEngines) {
+  if (!worldStateGetter) {
+    console.error("[EventService] Cannot register initial engines because worldStateGetter is not set.");
+    return;
+  }
+  if (!(initialEngines instanceof Map)) {
+      console.warn("[EventService] registerInitialActiveEngines received non-Map data:", initialEngines);
+      return;
+  }
+
+  console.log('[EventService] Initial active engines from storage being re-activated:', initialEngines);
+  for (const [scriptId, stepDetails] of initialEngines.entries()) {
+    if (scriptId && stepDetails?.stepId) {
+      // Call activateScriptEngine to correctly re-create the engine.
+      // Note: We pass null for scriptData to let the function load it itself.
+      activateScriptEngine(scriptId, null, stepDetails.stepId).catch(error => {
+          console.error(`[EventService] Failed to re-activate engine for script '${scriptId}' from storage:`, error);
+      });
+    }
+  }
 }
 // Store user inputs for AI decision context, associated with personas or script steps
 let userInputs = {};
@@ -253,7 +266,7 @@ async function loadScriptByTrigger(triggerEvent) {
    const existingEngine = activeEngines.get(scriptData.scriptId);
    if (!existingEngine) {
      console.log(`[EventService] No active engine found for ${scriptData.scriptId}. Activating new engine.`);
-     activateScriptEngine(scriptData.scriptId, scriptData); // Call activateScriptEngine only if not already active
+     activateScriptEngine(scriptData.scriptId, scriptData, null); // Call activateScriptEngine only if not already active
      console.log(`[EventService] activateScriptEngine called for ${scriptData.scriptId}`);
    } else {
      console.log(`[EventService] Script ${scriptData.scriptId} is already active. Skipping activation.`);
@@ -292,61 +305,69 @@ subscribe('game_start', () => {
  * @param {object} scriptData - The raw script data object.
  * @returns {Promise<void>}
  */
-// Reverted: Removed optionalGetWorldStateFunc parameter
-export function activateScriptEngine(scriptId, scriptData) {
-  return new Promise((resolve, reject) => {
-    if (!scriptId || !scriptData) {
-      console.error("activateScriptEngine requires scriptId and scriptData.");
-      reject(new Error("activateScriptEngine requires scriptId and scriptData."));
-      return;
+export async function activateScriptEngine(scriptId, scriptData, initialStepIdOverride) {
+  if (!scriptId) {
+    console.error("activateScriptEngine requires a scriptId.");
+    throw new Error("activateScriptEngine requires a scriptId.");
+  }
+
+  // Use the provided getWorldState or fallback to the module-level getter.
+  const finalGetWorldState = worldStateGetter;
+
+  try {
+    let data = scriptData;
+    // If scriptData is not provided, fetch it.
+    if (!data) {
+      console.log(`[EventService] scriptData for '${scriptId}' is null, fetching...`);
+      // This logic is simplified from loadScriptByTrigger. A more robust implementation
+      // would check multiple paths or have a centralized fetcher.
+      const path = `/scripts/events/${scriptId}.yaml`;
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch script ${scriptId}.yaml from path: ${path} (Status: ${response.status})`);
+      }
+      const yamlText = await response.text();
+      data = jsyaml.load(yamlText);
     }
 
-    try { // This is the main try block for the Promise executor
-      const executionTree = ScriptParser.buildTreeFromData(scriptData, scriptId); // Pass scriptId for error context
-      if (!executionTree) {
-          console.error(`[EventService] Failed to build execution tree for script '${scriptId}'`);
-          reject(new Error(`Failed to build execution tree for script '${scriptId}'`));
-          return; // Exit if tree build fails
-      }
-// --- STAGE C: Use persisted progress ---
-let initialStepIdOverride = null;
-const savedEngineStepObject = initialActiveEnginesFromStorage.get(scriptId);
-
-if (savedEngineStepObject && typeof savedEngineStepObject.stepId !== 'undefined') {
-    initialStepIdOverride = savedEngineStepObject.stepId;
-    console.log(`[EventService activateScriptEngine] Found saved progress for script ${scriptId}. Will attempt to start from step ${initialStepIdOverride}. Saved step object:`, savedEngineStepObject);
-} else {
-    console.log(`[EventService activateScriptEngine] No saved progress found for script ${scriptId}, or saved step object is invalid. Script will start from its entry point.`);
-}
-// --- END STAGE C ---
-
-const engine = new ScriptParser(executionTree, initialStepIdOverride); // Pass the resolved override
-
-if (engine.isFinished()) {
-  // If it's finished, and we tried to override, it means the override step might have been an end step or invalid.
-  // If no override, and it's finished, it means the script's entry itself is problematic or an end step.
-  console.error(`[EventService] ScriptParser initialized for '${scriptId}' but was immediately finished. Attempted start step: ${engine.current} (Override was: ${initialStepIdOverride}, Entry was: ${executionTree?.entry}).`);
-  reject(new Error(`ScriptParser failed to initialize or was immediately finished for script '${scriptId}' (started at step ${engine.current})`));
-        reject(new Error(`ScriptParser failed to initialize or was immediately finished for script '${scriptId}'`));
-        return; // Exit if engine is finished immediately
-      }
-      
-      activeEngines.set(scriptId, engine);
-      console.log(`Script engine created and activated for '${scriptId}'`);
-
-      const firstStep = engine.getCurrentStep();
-      if (firstStep) {
-        // Get initial state to pass with the first scriptStep
-        const initialState = worldStateGetter(); // Use getter here
-        eventQueue.push({ name: 'scriptStep', data: { scriptId, step: firstStep, worldState: initialState } });
-        scheduleQueueProcessing();
-      }
-      resolve();
-    } catch (e) { // This catch handles errors from the try block above
-      console.error(`Error during ScriptParser instance creation or activation for '${scriptId}':`, e);
-      reject(e);
+    if (!data) {
+        throw new Error(`Could not load script data for ${scriptId}`);
     }
-  });
+
+    const executionTree = ScriptParser.buildTreeFromData(data, scriptId);
+    if (!executionTree) {
+      throw new Error(`[EventService] Failed to build execution tree for script '${scriptId}'`);
+    }
+
+    // The override is now passed directly as a parameter.
+    if(initialStepIdOverride) {
+        console.log(`[EventService activateScriptEngine] An initialStepIdOverride was provided for script ${scriptId}: ${initialStepIdOverride}`);
+    }
+
+    console.log('[EventService] About to instantiate ScriptParser.');
+    const engine = new ScriptParser(executionTree, initialStepIdOverride);
+    engine.setWorldStateGetter(finalGetWorldState); // Use the new setter
+
+    if (engine.isFinished()) {
+      console.error(`[EventService] ScriptParser initialized for '${scriptId}' but was immediately finished. Attempted start step: ${engine.current} (Override was: ${initialStepIdOverride}, Entry was: ${executionTree?.entry}).`);
+      throw new Error(`ScriptParser failed to initialize or was immediately finished for script '${scriptId}' (started at step ${engine.current})`);
+    }
+
+    activeEngines.set(scriptId, engine);
+    console.log(`Script engine created and activated for '${scriptId}'`);
+
+    const firstStep = engine.getCurrentStep();
+    if (firstStep) {
+      const initialState = finalGetWorldState();
+      eventQueue.push({ name: 'scriptStep', data: { scriptId, step: firstStep, worldState: initialState } });
+      scheduleQueueProcessing();
+    }
+    // Async function resolves automatically
+  } catch (e) {
+    console.error(`Error during ScriptParser instance creation or activation for '${scriptId}':`, e);
+    // Re-throw the error to be caught by the caller (e.g., in registerInitialActiveEngines)
+    throw e;
+  }
 }
 
 // processAIDialogue, processAIDecision, setupAIEventHandlers remain the same

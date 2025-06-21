@@ -25,7 +25,7 @@ export async function getOpenRouterCompletion(apiKey, userMessage, history = [])
   const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
   // Recommended model (check OpenRouter for availability and pricing)
   // const model = "meta-llama/llama-4-maverick:free";
-  const model = "mistralai/devstral-small:free";
+  const model = "google/gemini-2.5-flash-lite-preview-06-17";
 
   try {
     const response = await fetch(apiUrl, {
@@ -246,6 +246,7 @@ export async function getGrokCompletion(apiKey, userMessage, history = []) {
 
   try {
     const messages = history.length > 0 ? history : [{ role: "user", content: userMessage }];
+    console.log("Sending prompt to AI:", JSON.stringify(messages, null, 2));
     const completion = await openai.chat.completions.create({
       messages: messages,
       model: "grok-3-mini-fast",

@@ -85,6 +85,10 @@ export default class ScriptParser {
   lastEventData = null; // Store data from the event that caused the last step transition
 
   constructor(executionTree, initialStepIdOverride = null) {
+    this.getWorldState = () => {
+      console.warn("ScriptParser: getWorldState called before it was set. Returning empty object.");
+      return {};
+    };
     if (executionTree && executionTree.scriptId && executionTree.steps && executionTree.entry !== undefined) {
         this.tree = executionTree;
         let startStepId = this.tree.entry; // Default to script's entry point
@@ -113,6 +117,14 @@ export default class ScriptParser {
       this.current = null;
       this.finished = true;
     }
+  }
+
+  setWorldStateGetter(getter) {
+    if (typeof getter !== 'function') {
+      console.error('ScriptParser FATAL: Attempted to set WorldStateGetter with a non-function. Received:', getter);
+      return;
+    }
+    this.getWorldState = getter;
   }
 
   static buildTreeFromData(scriptData, scriptIdForError = 'unknown') {
@@ -295,13 +307,15 @@ export default class ScriptParser {
            // 由于 ScriptParser 无法直接访问聊天历史记录，我们需要通过 EventService 获取
            const normalizedAiDialoguePersona = normalizePersonaId(step.persona);
            const normalizedAiDialogueOwner = normalizePersonaId(step.owner || step.persona);
+            const worldState = this.getWorldState ? this.getWorldState() : {};
+            const history = worldState.chatHistories ? (worldState.chatHistories[normalizedAiDialogueOwner] || []) : [];
            publish('requestAIDialogue', {
              scriptId: this.tree.scriptId,
              stepId: this.current,
              prompt: resolvedPrompt,
              persona: normalizedAiDialoguePersona,
              owner: normalizedAiDialogueOwner,
-             history: [],
+             history: history,
              audio: step.audio || null // 包含音频字段
            }, eventName);
          } else if (eventName === 'dialogueClosed') {
