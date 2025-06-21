@@ -27,7 +27,11 @@ export function WorldStateProvider({ children }) {
       reputation: {},
     };
     const defaultPersonasState = PERSONAS.reduce((acc, persona) => {
-      acc[persona.id] = { requiresChatWindow: persona.requiresChatWindow };
+      acc[persona.id] = {
+        requiresChatWindow: persona.requiresChatWindow,
+        hasFavorability: persona.hasFavorability || false,
+        favorability: persona.hasFavorability ? persona.initialFavorability : null,
+      };
       return acc;
     }, {});
     const defaultChatHistoriesState = {};
@@ -95,6 +99,14 @@ export function WorldStateProvider({ children }) {
                     ...(finalPersonasState[authoritativeId]), // Keep existing default/authoritative data
                     ...savedPersonaData                     // Override with saved data
                   };
+                  
+                  // Ensure favorability data from initial defaults is preserved if not in saved data
+                  if (finalPersonasState[authoritativeId].hasFavorability && typeof finalPersonasState[authoritativeId].favorability !== 'number') {
+                    const personaDefault = PERSONAS.find(p => p.id === authoritativeId);
+                    if (personaDefault && personaDefault.hasFavorability) {
+                      finalPersonasState[authoritativeId].favorability = personaDefault.initialFavorability;
+                    }
+                  }
 
                   // If the rawId from localStorage was different from the authoritativeId,
                   // and its data has now been merged into the authoritativeId entry,
@@ -581,7 +593,38 @@ export function WorldStateProvider({ children }) {
 
   const setChatHistories = useCallback((newChatHistories) => {
     setState(prev => ({ ...prev, chatHistories: typeof newChatHistories === 'function' ? newChatHistories(prev.chatHistories) : newChatHistories }));
-  }, []); 
+  }, []);
+  
+  const updatePersonaFavorability = useCallback((personaId, change) => {
+    if (typeof change !== 'number') return;
+    
+    let newFavorabilityValue;
+    setState(prev => {
+      const targetPersona = prev.personas[personaId];
+      if (!targetPersona || !targetPersona.hasFavorability) {
+        console.warn(`[WorldStateContext] Attempted to update favorability for persona '${personaId}', which does not have this feature enabled.`);
+        return prev;
+      }
+      
+      const currentFavorability = targetPersona.favorability || 0;
+      newFavorabilityValue = currentFavorability + change;
+      
+      const newPersonas = {
+        ...prev.personas,
+        [personaId]: {
+          ...targetPersona,
+          favorability: newFavorabilityValue
+        }
+      };
+      return { ...prev, personas: newPersonas };
+    });
+
+    publishEvent('persona_favorability_updated', {
+      personaId,
+      change,
+      newFavorability: newFavorabilityValue
+    });
+  }, [publishEvent]);
  
   const addDiscoveredClue = useCallback((clueObject) => {
     if (!clueObject || typeof clueObject.id === 'undefined') return;
@@ -754,6 +797,7 @@ export function WorldStateProvider({ children }) {
     },
     attemptSolvePuzzle,
     updateSvmStatus, setActiveTask, updatePlayerCredits, updatePlayerInventory, updatePlayerReputation,
+    updatePersonaFavorability, // Add the new function here
     getWorldState
   }), [
     svms, activeTask, player, personas, chatHistories, setChatHistories,
@@ -762,6 +806,7 @@ export function WorldStateProvider({ children }) {
     unlockedTasks, completedTasks,
     attemptSolvePuzzle,
     updateSvmStatus, setActiveTask, updatePlayerCredits, updatePlayerInventory, updatePlayerReputation,
+    updatePersonaFavorability, // And also in the dependency array
     getWorldState
   ]);
   

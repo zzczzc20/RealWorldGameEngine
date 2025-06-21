@@ -4,6 +4,7 @@ import { getAICompletion } from '../services/AIService'; // Changed to getAIComp
 import { getSystemPrompt } from '../services/AIContext';
 import { notifyScript, publish, subscribe, unsubscribe } from '../services/EventService';
 import PERSONAS from '../data/personaData'; // Import PERSONAS
+import { useWorldStateContext } from '../context/WorldStateContext'; // Import context
 
 function ChatWindow({ 
   persona, 
@@ -23,58 +24,127 @@ function ChatWindow({
   console.log("[ChatWindow] Received persona prop:", JSON.stringify(persona));
   console.log("[ChatWindow] Received isAiCurrentlyTyping:", isAiCurrentlyTyping);
 
+const chatHistoryRef = useRef(null);
+const [message, setMessage] = useState('');
+const [isLoading, setIsLoading] = useState(false); // For user-sent messages
+const [error, setError] = useState(null);
+const { personas, updatePersonaFavorability } = useWorldStateContext(); // Use context
 
-  const chatHistoryRef = useRef(null);
-  const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // For user-sent messages
-  const [error, setError] = useState(null);
-
-  const systemPrompt = persona ? getSystemPrompt(activeTask, svms, formattedScriptContext, apiKey, language, persona.id) : '';
-  const systemMessage = { role: 'system', content: systemPrompt };
-
-  useEffect(() => {
-    if (activeTask && !chatHistory.some(msg => msg.role === 'system') && persona) {
-      updateChatHistory(systemMessage);
-    }
-  }, [activeTask, persona]); // Adjusted dependencies
-
-  useEffect(() => {
-    if (chatHistoryRef.current) {
-      chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
-    }
-  }, [chatHistory]);
+// This useEffect is for scrolling, it's fine.
+useEffect(() => {
+  if (chatHistoryRef.current) {
+    chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
+  }
+}, [chatHistory]);
 
   const handleSendMessage = async () => {
-    if (!message.trim() || isLoading || isAiCurrentlyTyping || !apiKey || !persona) return; // Prevent send if AI is typing
+    if (!message.trim() || isLoading || isAiCurrentlyTyping || !apiKey || !persona) return;
     setError(null);
     setIsLoading(true);
+
     const userMessage = { role: 'user', content: message };
-    // Sanitize roles for the API call
-    const historyForLLM = chatHistory
-      .filter(msg => msg.role !== 'system')
-      .map(msg => {
-        if (msg.role === 'user') {
-          return msg;
-        } else if (persona && msg.role === persona.id) { // Current AI persona's past messages
-          return { ...msg, role: 'assistant' };
-        } else { // Other characters' past messages, treat as user context for the current AI
-          return { ...msg, role: 'user' };
-        }
-      });
     updateChatHistory(userMessage);
     publish('userInputUpdated', { input: message, persona: persona.id });
     setMessage('');
+
     try {
-      // Use getAICompletion with provider
-      const assistantContent = await getAICompletion(apiProvider, apiKey, message, [
-        systemMessage,
-        ...historyForLLM,
-        userMessage
-      ]);
-      const assistantMessage = { role: persona.id || 'assistant', content: assistantContent };
-      updateChatHistory(assistantMessage);
+      const personaState = personas[persona.id];
+      let tools = [];
+      let systemPromptContent = getSystemPrompt(activeTask, svms, formattedScriptContext, apiKey, language, persona.id);
+
+      if (personaState?.hasFavorability) {
+        const favorabilityTool = {
+          type: 'function',
+          function: {
+            name: 'update_favorability',
+            description: "根据玩家的对话或行为，调整与特定角色的好感度。",
+            parameters: {
+              type: "object",
+              properties: {
+                personaId: {
+                  type: "string",
+                  description: `需要调整好感度的角色的ID，当前角色ID是 '${persona.id}'。`
+                },
+                change: {
+                  type: "integer",
+                  description: "好感度的变化值。正数表示增加，负数表示减少。变化范围通常在 -5 到 5 之间。"
+                },
+                reason: {
+                  type: "string",
+                  description: "根据玩家的哪句话或哪个行为做出此次好感度调整的简要原因。"
+                }
+              },
+              required: ["personaId", "change", "reason"]
+            }
+          }
+        };
+        tools.push(favorabilityTool);
+        systemPromptContent += `\n\n--- 好感度系统指令 ---\n你正在扮演的角色有一个好感度指数，当前值为 ${personaState.favorability} (范围0-100)。你需要根据用户的言行，在对话的适当时候，秘密地使用 'update_favorability' 工具来调整这个值。这个调整过程对用户是不可见的。调整后，请根据新的好感度继续你的对话。`;
+      }
+
+      const systemMessage = { role: 'system', content: systemPromptContent };
+      
+      const historyForLLM = chatHistory
+        .filter(msg => msg.role !== 'system' && msg.role !== 'tool')
+        .map(msg => ({
+          role: (msg.role === 'user' || msg.role !== persona.id) ? 'user' : 'assistant',
+          content: msg.content
+        }));
+
+      let messages = [systemMessage, ...historyForLLM, userMessage];
+
+      // Loop to handle potential tool calls
+      for (let i = 0; i < 5; i++) { // Limit iterations to prevent infinite loops
+        const completion = await getAICompletion(apiProvider, apiKey, messages, tools);
+        const choice = completion.message;
+
+        if (choice.tool_calls) {
+          console.log("AI requested tool call:", choice.tool_calls);
+          messages.push(choice); // Add AI's tool request to history
+
+          for (const toolCall of choice.tool_calls) {
+            const functionName = toolCall.function.name;
+            const args = JSON.parse(toolCall.function.arguments);
+
+            if (functionName === 'update_favorability') {
+              updatePersonaFavorability(args.personaId, args.change);
+              console.log(`Favorability for ${args.personaId} changed by ${args.change}. Reason: ${args.reason}`);
+              
+              messages.push({
+                tool_call_id: toolCall.id,
+                role: 'tool',
+                name: functionName,
+                content: JSON.stringify({ status: 'success', newFavorability: (personas[args.personaId]?.favorability || 0) + args.change })
+              });
+            }
+          }
+        } else {
+          // No tool call, this is the final text response.
+          // Still, we need to check for inline commands like update_favorability.
+          let messageContent = choice.content;
+          const favorabilityRegex = /update_favorability\((-?\d+)\)/;
+          const match = messageContent.match(favorabilityRegex);
+
+          if (match) {
+            const favorabilityChange = parseInt(match[1], 10);
+            console.log(`[ChatWindow] Found inline favorability update: ${match[0]}. Changing by ${favorabilityChange} for ${persona.id}.`);
+            updatePersonaFavorability(persona.id, favorabilityChange);
+            messageContent = messageContent.replace(favorabilityRegex, '').trim();
+          }
+
+          if (messageContent) {
+            const assistantMessage = { role: persona.id || 'assistant', content: messageContent };
+            updateChatHistory(assistantMessage);
+          } else {
+            console.log("[ChatWindow] Assistant message was empty after processing inline commands.");
+          }
+          
+          break; // Exit loop
+        }
+      }
+
     } catch (err) {
-      console.error(`Error calling AI provider (${apiProvider}):`, err); // Updated error log
+      console.error(`Error calling AI provider (${apiProvider}):`, err);
       setError('AI Error: ' + err.message);
     }
     setIsLoading(false);
@@ -117,7 +187,14 @@ function ChatWindow({
   return (
     <div className="flex flex-col h-full bg-gray-900">
       <div className="flex-shrink-0 flex justify-between items-center p-2 bg-gray-800 border-b border-purple-600">
-        <h3 className="text-purple-400 font-semibold">{persona?.name || 'Chat'}</h3>
+        <div className="flex items-center">
+          <h3 className="text-purple-400 font-semibold">{persona?.name || 'Chat'}</h3>
+          {persona && personas[persona.id]?.hasFavorability && (
+            <span className="ml-3 px-2 py-0.5 text-xs bg-pink-600 text-white rounded-full shadow">
+              好感度: {personas[persona.id].favorability}
+            </span>
+          )}
+        </div>
         <button onClick={handleClose} className="text-gray-400 hover:text-white">
           &times;
         </button>

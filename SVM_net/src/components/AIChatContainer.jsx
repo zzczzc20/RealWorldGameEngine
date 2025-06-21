@@ -21,10 +21,11 @@ function AIChatContainer({ isVisible, onClose, apiProvider, apiKey, language, on
     svms, 
     activeTask, 
     personas, 
-    /** @type {Record<string, ChatMessage[]>} */ 
-    chatHistories, 
-    setChatHistories 
-  } = useWorldStateContext(); 
+    /** @type {Record<string, ChatMessage[]>} */
+    chatHistories,
+    setChatHistories,
+    updatePersonaFavorability
+  } = useWorldStateContext();
   
   const [activePersona, setActivePersona] = useState(null);
   const [aiTypingState, setAiTypingState] = useState({}); // Tracks AI typing status per persona
@@ -211,44 +212,56 @@ function AIChatContainer({ isVisible, onClose, apiProvider, apiKey, language, on
         return;
       }
       
-      const aiOwnerRaw = data.owner || data.persona || data.character; // This determines the chat window
+      const aiOwnerRaw = data.owner || data.persona || data.character;
       const aiOwnerPersona = PERSONAS.find(p => p.id.toLowerCase() === (aiOwnerRaw || '').toLowerCase());
-      const ownerIdForMessage = aiOwnerPersona ? aiOwnerPersona.id : 'Nova'; 
+      const ownerIdForMessage = aiOwnerPersona ? aiOwnerPersona.id : 'Nova';
 
       const aiMessageStepIdentifier = `${data.scriptId}-${data.stepId}`;
       if (processedAiDialogueStepsRef.current.has(aiMessageStepIdentifier)) {
-        console.log(`[AIChatContainer aiDialogueReady] Step ${aiMessageStepIdentifier} already processed by ref. Clearing typing for ${ownerIdForMessage}.`);
-        setAiTypingState(prev => ({ ...prev, [ownerIdForMessage]: false })); 
+        console.log(`[AIChatContainer aiDialogueReady] Step ${aiMessageStepIdentifier} already processed. Clearing typing for ${ownerIdForMessage}.`);
+        setAiTypingState(prev => ({ ...prev, [ownerIdForMessage]: false }));
         return;
       }
 
-      const aiCharacterRaw = data.character || data.persona; // This is the actual speaker
+      const aiCharacterRaw = data.character || data.persona;
       const aiCharacterPersona = PERSONAS.find(p => p.id.toLowerCase() === (aiCharacterRaw || '').toLowerCase());
-      const characterIdForMessage = aiCharacterPersona ? aiCharacterPersona.id : 'Nova'; 
+      const characterIdForMessage = aiCharacterPersona ? aiCharacterPersona.id : 'Nova';
       
+      let messageContent = data.text;
+      const favorabilityRegex = /update_favorability\((-?\d+)\)/;
+      const match = messageContent.match(favorabilityRegex);
+
+      if (match) {
+        const favorabilityChange = parseInt(match[1], 10);
+        console.log(`[AIChatContainer] Found favorability update: ${match[0]}. Changing by ${favorabilityChange} for ${characterIdForMessage}.`);
+        updatePersonaFavorability(characterIdForMessage, favorabilityChange);
+        messageContent = messageContent.replace(favorabilityRegex, '').trim();
+      }
+      
+      if (!messageContent) {
+        console.log("[AIChatContainer] Message content is empty after processing commands. Not adding to history.");
+        setAiTypingState(prev => ({ ...prev, [ownerIdForMessage]: false }));
+        processedAiDialogueStepsRef.current.add(aiMessageStepIdentifier); // Mark as processed even if no message is shown
+        return;
+      }
+
       /** @type {ChatMessage} */
       const aiMessage = {
-        role: characterIdForMessage, 
-        content: data.text,
+        role: characterIdForMessage,
+        content: messageContent,
         source: 'ai-script',
         stepId: data.stepId,
         scriptId: data.scriptId
       };
 
-      const currentPersonaHistory = chatHistories?.[ownerIdForMessage] || []; 
-      const lastMessage = currentPersonaHistory[currentPersonaHistory.length - 1];
-       if (!lastMessage || lastMessage.scriptId !== aiMessage.scriptId || lastMessage.stepId !== aiMessage.stepId || lastMessage.content !== aiMessage.content || lastMessage.source !== aiMessage.source) {
-        setChatHistories(prevChatHistories => ({
-          ...prevChatHistories,
-          [ownerIdForMessage]: [...(prevChatHistories?.[ownerIdForMessage] || []), aiMessage] 
-        }));
-        processedAiDialogueStepsRef.current.add(aiMessageStepIdentifier);
-        console.log(`[AIChatContainer aiDialogueReady] Added msg for ${ownerIdForMessage}, marked ${aiMessageStepIdentifier} processed.`);
-      } else {
-         console.log(`[AIChatContainer aiDialogueReady] Duplicate (content check) for ${ownerIdForMessage} (step ${aiMessageStepIdentifier}).`);
-      }
+      setChatHistories(prevChatHistories => ({
+        ...prevChatHistories,
+        [ownerIdForMessage]: [...(prevChatHistories?.[ownerIdForMessage] || []), aiMessage]
+      }));
+      processedAiDialogueStepsRef.current.add(aiMessageStepIdentifier);
+      console.log(`[AIChatContainer aiDialogueReady] Added msg for ${ownerIdForMessage}, marked ${aiMessageStepIdentifier} processed.`);
       
-      setAiTypingState(prev => ({ ...prev, [ownerIdForMessage]: false })); 
+      setAiTypingState(prev => ({ ...prev, [ownerIdForMessage]: false }));
 
       if (ownerIdForMessage !== activePersona) {
         setUnreadMessages(prev => ({ ...prev, [ownerIdForMessage]: true }));
@@ -257,7 +270,7 @@ function AIChatContainer({ isVisible, onClose, apiProvider, apiKey, language, on
 
     subscribe('aiDialogueReady', handleAIDialogue);
     return () => unsubscribe('aiDialogueReady', handleAIDialogue);
-  }, [activePersona, chatHistories, setChatHistories, activeScriptId]);
+  }, [activePersona, chatHistories, setChatHistories, activeScriptId, updatePersonaFavorability]);
 
   /** @param {string} personaId, @param {ChatMessage} message */
   const updateChatHistory = (personaId, message) => {

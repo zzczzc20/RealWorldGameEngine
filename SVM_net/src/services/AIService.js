@@ -39,7 +39,7 @@ export async function getOpenRouterCompletion(apiKey, userMessage, history = [])
       },
       body: JSON.stringify({
         model: model,
-        messages: history.length > 0 ? history : [{ role: "user", content: userMessage }]
+        messages: [...history, { role: "user", content: userMessage }]
         // Optional parameters (temperature, max_tokens, etc.) can be added here
         // "temperature": 0.7, 
         // "max_tokens": 150, 
@@ -214,50 +214,42 @@ export async function getSambaNovaCompletion(apiKey, userMessage, history = []) 
  * should be handled securely on a backend server/proxy.
  *
  * @param {string} apiKey - The user's Grok API Key.
- * @param {string} userMessage - The message from the user.
- * @param {Array<{role: string, content: string}>} history - Optional chat history.
- * @returns {Promise<string>} - A promise that resolves with the assistant's message content.
+ * @param {Array<{role: string, content: string}>} messages - The full message history.
+ * @param {Array<object>} [tools] - Optional list of tools the model can call.
+ * @returns {Promise<object>} - A promise that resolves with the full completion object from the API.
  * @throws {Error} - Throws an error if the API call fails.
  */
-export async function getGrokCompletion(apiKey, userMessage, history = []) {
-  if (!apiKey) {
-    throw new Error("Grok API Key is required.");
-  }
-  if (!userMessage) {
-    throw new Error("User message cannot be empty.");
-  }
-
-  // Mask the API key for logging (show only first few and last few characters)
-  const maskedApiKey = apiKey.length > 10
-    ? `${apiKey.substring(0, 5)}...${apiKey.substring(apiKey.length - 5)}`
-    : 'KEY_TOO_SHORT';
-  
-  console.log("Grok API Request Details:");
-  console.log("Base URL: https://api.x.ai/v1");
-  console.log("API Key (masked):", maskedApiKey);
-  console.log("Model: grok-3-mini-fast");
-  console.log("Messages:", history.length > 0 ? history : [{ role: "user", content: userMessage }]);
+export async function getGrokCompletion(apiKey, messages, tools) {
+  if (!apiKey) throw new Error("Grok API Key is required.");
+  if (!messages || messages.length === 0) throw new Error("Messages array cannot be empty.");
 
   const openai = new OpenAI({
     baseURL: 'https://api.x.ai/v1',
     apiKey: apiKey,
-    dangerouslyAllowBrowser: true // Allow running in browser environment for demo purposes
+    dangerouslyAllowBrowser: true
   });
 
   try {
-    const messages = history.length > 0 ? history : [{ role: "user", content: userMessage }];
-    console.log("Sending prompt to AI:", JSON.stringify(messages, null, 2));
-    const completion = await openai.chat.completions.create({
+    const requestBody = {
       messages: messages,
       model: "grok-3-mini-fast",
-    });
+    };
 
-    if (completion.choices && completion.choices.length > 0 && completion.choices[0].message?.content) {
-      console.log("Grok API Response received successfully.");
-      return completion.choices[0].message.content.trim();
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools;
+      requestBody.tool_choice = "auto";
+    }
+    
+    console.log("Sending prompt to Grok AI:", JSON.stringify(requestBody, null, 2));
+    const completion = await openai.chat.completions.create(requestBody);
+    console.log("Grok API Response received successfully:", completion);
+    
+    // Return the entire first choice object, which includes message, tool_calls, etc.
+    if (completion.choices && completion.choices.length > 0) {
+      return completion.choices[0];
     } else {
       console.error("Invalid response structure from Grok:", completion);
-      throw new Error("Received an invalid response structure from Grok. Please check API connectivity or response format.");
+      throw new Error("Received an invalid response structure from Grok.");
     }
   } catch (error) {
     console.error("Error calling Grok API:", error);
@@ -270,23 +262,41 @@ export async function getGrokCompletion(apiKey, userMessage, history = []) {
  *
  * @param {string} provider - The API provider ('openrouter', 'deepseek', 'sambanova', or 'grok').
  * @param {string} apiKey - The API key for the selected provider.
- * @param {string} userMessage - The message from the user.
- * @param {Array<{role: string, content: string}>} history - Optional chat history.
- * @returns {Promise<string>} - A promise that resolves with the assistant's message content.
+ * @param {Array<{role: string, content: string}>} messages - The full message history including the latest user message.
+ * @param {Array<object>} [tools] - Optional list of tools the model can call.
+ * @returns {Promise<object>} - A promise that resolves with the full completion choice object.
  * @throws {Error} - Throws an error if the API call fails or provider is invalid.
  */
-export async function getAICompletion(provider, apiKey, userMessage, history = []) {
+export async function getAICompletion(provider, apiKey, messages, tools) {
+  // For now, we'll focus on modifying the 'grok' provider to support tool calls.
+  // Other providers can be updated similarly later.
+  if (provider === 'grok') {
+    // Note: The new getGrokCompletion expects 'messages' array directly.
+    return await getGrokCompletion(apiKey, messages, tools);
+  }
+  
+  // Fallback to old logic for other providers for now
+  const history = messages.slice(0, -1);
+  const userMessage = messages[messages.length - 1]?.content || "";
+
+  let completionContent;
   if (provider === 'openrouter') {
-    return await getOpenRouterCompletion(apiKey, userMessage, history);
+    completionContent = await getOpenRouterCompletion(apiKey, userMessage, history);
   } else if (provider === 'deepseek') {
-    return await getDeepSeekCompletion(apiKey, userMessage, history);
+    completionContent = await getDeepSeekCompletion(apiKey, userMessage, history);
   } else if (provider === 'sambanova') {
-    return await getSambaNovaCompletion(apiKey, userMessage, history);
-  } else if (provider === 'grok') {
-    return await getGrokCompletion(apiKey, userMessage, history);
+    completionContent = await getSambaNovaCompletion(apiKey, userMessage, history);
   } else {
     throw new Error("Invalid API provider specified. Use 'openrouter', 'deepseek', 'sambanova', or 'grok'.");
   }
+
+  // Wrap the string response in the expected object structure for compatibility
+  return {
+    message: {
+      role: 'assistant',
+      content: completionContent
+    }
+  };
 }
 
 /**
@@ -320,11 +330,15 @@ export async function getAIDialogueCompletion(provider, apiKey, prompt, persona 
   ];
 
   try {
-    // Use the existing completion function
-    // Provide a minimal user message if history is empty, as API might require it.
-    const placeholderUserMessage = history.length === 0 ? "Proceed." : null;
-    const response = await getAICompletion(provider, apiKey, placeholderUserMessage, messages);
-    return response;
+    const messagesForAPI = [...messages];
+    // For non-grok providers, getAICompletion expects a user message at the end.
+    if (messagesForAPI.length === 0 || messagesForAPI[messagesForAPI.length - 1].role !== 'user') {
+      messagesForAPI.push({ role: "user", content: "Proceed." });
+    }
+
+    // Use the existing completion function with corrected arguments
+    const completion = await getAICompletion(provider, apiKey, messagesForAPI);
+    return completion.message.content;
   } catch (error) {
     console.error("Error in AI dialogue generation:", error);
     throw error;
@@ -380,11 +394,12 @@ CRITICAL INSTRUCTION: Respond ONLY with the nextStep value (a NUMBER) of your ch
     console.log("Full prompt sent to AI for decision:", systemMessage);
     console.log("Full messages array sent to AI:", messages);
     
-    // Use the completion function with a placeholder user message
-    const response = await getAICompletion(provider, apiKey, "Make your decision now.", messages);
+    // Use the completion function with corrected arguments
+    const completion = await getAICompletion(provider, apiKey, messages);
+    const responseText = completion?.message?.content || "";
     
     // Parse the response to extract a number
-    const numberMatch = response.match(/\d+/);
+    const numberMatch = responseText.match(/\d+/);
     if (numberMatch) {
       const chosenNumber = parseInt(numberMatch[0], 10);
       
