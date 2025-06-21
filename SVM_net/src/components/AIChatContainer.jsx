@@ -90,22 +90,43 @@ function AIChatContainer({ isVisible, onClose, apiProvider, apiKey, language, on
         const currentStepIdentifierNav = `${activeScriptId}-${currentScriptStep.stepId}`; // Used for lastNavigatedStepRef
 
         // Handle AI Typing indicator start & Navigation for AI Dialogue
+        // Handle AI Typing indicator start & Navigation for AI Dialogue
         if (currentScriptStep.type === 'aiDialogue') {
-          const aiStepIdentifierForTyping = `${activeScriptId}-${currentScriptStep.stepId}`;
-          if (lastAiDialogueStepProcessedForTypingRef.current !== aiStepIdentifierForTyping) {
-            const typingOwnerId = ownerId; // Typing indicator in the owner's window
-            console.log(`[AIChatContainer] aiDialogue step ${aiStepIdentifierForTyping} detected. Setting typing true for ${typingOwnerId}.`);
-            setAiTypingState(prev => ({ ...prev, [typingOwnerId]: true }));
-            lastAiDialogueStepProcessedForTypingRef.current = aiStepIdentifierForTyping;
+          const aiStepIdentifier = `${activeScriptId}-${currentScriptStep.stepId}`;
+          
+          // New logic: Immediately add the prompt as the first message
+          if (!processedAiDialogueStepsRef.current.has(aiStepIdentifier)) {
+            /** @type {ChatMessage} */
+            const initialMessage = {
+              role: currentScriptStep.persona, // The AI persona is the speaker
+              content: currentScriptStep.prompt,
+              source: 'script',
+              stepId: currentScriptStep.stepId,
+              scriptId: activeScriptId,
+            };
+
+            setChatHistories(prevChatHistories => {
+              const currentHistory = prevChatHistories?.[ownerId] || [];
+              return { ...prevChatHistories, [ownerId]: [...currentHistory, initialMessage] };
+            });
+
+            processedAiDialogueStepsRef.current.add(aiStepIdentifier);
+            console.log(`[AIChatContainer] Added initial aiDialogue prompt for step ${aiStepIdentifier}`);
           }
+
+          // REMOVED: AI Typing indicator logic is no longer needed for the first message.
+          // const aiStepIdentifierForTyping = `${activeScriptId}-${currentScriptStep.stepId}`;
+          // if (lastAiDialogueStepProcessedForTypingRef.current !== aiStepIdentifierForTyping) {
+          //   const typingOwnerId = ownerId;
+          //   console.log(`[AIChatContainer] aiDialogue step ${aiStepIdentifierForTyping} detected. Setting typing true for ${typingOwnerId}.`);
+          //   setAiTypingState(prev => ({ ...prev, [typingOwnerId]: true }));
+          //   lastAiDialogueStepProcessedForTypingRef.current = aiStepIdentifierForTyping;
+          // }
           
           // Navigation for AI Dialogue
           if (lastNavigatedStepRef.current !== currentStepIdentifierNav) {
-            // For aiDialogue, navigate to the persona specified in the step (who is the AI)
-            // but the window is determined by ownerId. We want to open the ownerId's window.
             const targetPersonaIdForNav = ownerId;
-            // const targetPersonaData = PERSONAS.find(p => p.id === targetPersonaIdForNav); // OLD: Uses static data
-            const targetPersonaData = personas[targetPersonaIdForNav]; // NEW: Uses dynamic state from WorldStateContext
+            const targetPersonaData = personas[targetPersonaIdForNav];
             if (targetPersonaData?.requiresChatWindow) {
                 console.log(`[AIChatContainer] Navigating to ${targetPersonaIdForNav} (requiresChatWindow: true) for aiDialogue step.`);
                 setActivePersona(targetPersonaIdForNav);

@@ -206,12 +206,6 @@ steps:
     persona: "Echo"
     nextStep: 3
 
-  # - stepId: 2
-  #   type: aiDialogue # 主角的內心反應，體現末世下的警惕和對信息的懷疑
-  #   prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你收到了這個： 殘缺的月亮，在水面尋找完整的倒影。（內心獨白）這是什麼？新的垃圾郵件格式？某種釣魚信息？還是…哪個角落裏的瘋子在發詩？聽說最近暗網有很多機詐騙機器人，忽略它。" # 懷疑是詐騙或無意義信息
-  #   persona: "Protagonist_Internal" # (可選) 定義主角內心獨白的語氣：警惕、疲憊、略帶嘲諷
-  #   waitFor: dialogueClosed # 等待玩家閱讀完內心獨白併點擊繼續
-  #   nextStep: 3
 
   - stepId: 3
     type: dialogue # Echo 的第二次信息，略微加強聯繫感，暗示主角的“不得感”
@@ -219,12 +213,6 @@ steps:
     persona: "Echo"
     nextStep: 5
 
-  # - stepId: 4
-  #   type: aiDialogue # 主角的煩躁和一絲不安，試圖理性化或屏蔽
-  #   prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你收到了這個： 殘缺的月亮，在水面尋找完整的倒影；那空缺之處，唯有回聲鳴響。（內心獨白，略帶煩躁）又是它…'空缺'？巧合？還是某種…讀心廣告程序？這東西到底是什麼？得想辦法屏蔽。" # 開始感到不安，但仍試圖歸結為技術問題
-  #   persona: "Protagonist_Internal"
-  #   waitFor: dialogueClosed
-  #   nextStep: 5
 
   - stepId: 5
     type: dialogue # Echo 的第三次信息，引入行動/方嚮的暗示，關聯失憶
@@ -234,7 +222,7 @@ steps:
 
   - stepId: 6
     type: aiDialogue # 主角決定採取行動屏蔽，顯示抗拒
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你收到了這個： 殘缺的月亮，在水面尋找完整的倒影；那空缺之處，唯有回聲鳴響；岸邊的燈塔已滅，唯有內心的羅盤指嚮遺忘之海。（內心獨白）這是什麼？新的垃圾郵件格式？某種釣魚信息？" # 試圖切斷聯繫
+    prompt: "一个叫Echo的未知账号发来了這個信息： 殘缺的月亮，在水面尋找完整的倒影；那空缺之處，唯有回聲鳴響；岸邊的燈塔已滅，唯有內心的羅盤指嚮遺忘之海。（內心獨白）這是什麼？新的垃圾郵件格式？某種釣魚信息？" # 試圖切斷聯繫
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 7 # 接下來 Echo 將展示其無法被輕易屏蔽的特性
@@ -260,7 +248,7 @@ steps:
 
   - stepId: 10
     type: aiDialogue 
-    prompt: "system: 不要直接回應玩家的問題 (不要回應該指示，直接和玩家對話)，本條消息回應：無可奉告，不要增減任何字符或回復好的"
+    prompt: "無可奉告"
     persona: "Echo"
     waitFor: dialogueClosed
     nextStep: first_sync
@@ -312,7 +300,7 @@ steps:
 
   - stepId: dump_3
     type: aiDialogue
-    prompt: "本條消息你作為AI Echo回應：[到達我為你指明的腐朽之處了嗎] 不要增減字符或回應好的，不要自己生成多余內容。"
+    prompt: "到達我為你指明的腐朽之處了嗎"
     persona: "Echo"
     waitFor: dialogueClosed
     nextStep: dump_4
@@ -472,7 +460,7 @@ steps:
 
   - stepId: dump_29
     type: aiDialogue # 主角看著 Kiera 的直播片段（假設看到了），內心可能與 Echo 的信息產生某種奇怪的聯繫或對比
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，剛剛Echo把你帶到發電站，給你看一個標語，寫著DANGER，讓你摸不著頭腦，到底什麼危險？" # 內心將 Kiera 的錶象與 Echo 的詩意信息對比，產生疑惑
+    prompt: "我一路跟随着匿名消息的发出者Echo，剛剛Echo把我帶到發電站，給我看一個標語，寫著DANGER，真是摸不著頭腦，到底什麼危險？" # 內心將 Kiera 的錶象與 Echo 的詩意信息對比，產生疑惑
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: dump_30
@@ -735,7 +723,7 @@ steps:
 
   - stepId: 21
     type: aiDialogue # 主角看著 Kiera 的直播片段（假設看到了），內心可能與 Echo 的信息產生某種奇怪的聯繫或對比
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你（阿強）正在看阿明給你展示的 Kiera 直播片段，畫面光鮮亮麗，Kiera 笑容燦爛地介紹著美食。本條消息回應：（內心獨白）這就是阿明說的 Kiera？確實…很吸引眼球。和這裏的破敗完全是兩個世界。這種光鮮…感覺有點不真實，我從未看過她的直播。阿明也應該更多的關註自己的生存而不是沈迷於虛擬直播。不要增減任何字符或回復好的" # 內心將 Kiera 的錶象與 Echo 的詩意信息對比，產生疑惑
+    prompt: "我正在看阿明給我展示的 Kiera 直播片段，畫面光鮮亮麗，Kiera 笑容燦爛地介紹著美食。（內心獨白）這就是阿明說的 Kiera？確實…很吸引眼球。和這裏的破敗完全是兩個世界。這種光鮮…感覺有點不真實，我從未看過她的直播。阿明也應該更多的關註自己的生存而不是沈迷於虛擬直播。" # 內心將 Kiera 的錶象與 Echo 的詩意信息對比，產生疑惑
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 22
@@ -761,7 +749,7 @@ steps:
 
   - stepId: 25
     type: aiDialogue # 主角內心被觸動，“父親失蹤”的信息與自身失憶關聯
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你（阿強）聽到阿明說：'我爸…不知道跑哪去了，好久沒消息了。跟你爸一樣吧？聽說你爸當年也是…突然就沒影了？' （內心獨白）我爸…失蹤了？我完全沒有印象…但是阿明這麼說…難道這也是我忘記的事情之一？'當年'…是指什麼時候？這和我的失憶有關嗎？" # 內心將父親失蹤與失憶、可能存在的事件聯繫起來，產生更多疑問
+    prompt: "聽到阿明說：'我爸…不知道跑哪去了，好久沒消息了。跟你爸一樣吧？聽說你爸當年也是…突然就沒影了？' （內心獨白）我爸…失蹤了？我完全沒有印象…但是阿明這麼說…難道這也是我忘記的事情之一？'當年'…是指什麼時候？這和我的失憶有關嗎？" # 內心將父親失蹤與失憶、可能存在的事件聯繫起來，產生更多疑問
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 26 # 對話暫時告一段落，主角獲得了關於涼茶鋪、Kiera、自身失憶和父親失蹤的初步信息
@@ -815,7 +803,7 @@ steps:
 
   - stepId: 6001
     type: aiDialogue
-    prompt: "本條消息你作為AI阿明回應：[我們上哪裏去和他們對抗啊！] 不要增減字符或回應好的，AI不要生成任何自定義內容。"
+    prompt: "我們上哪裏去和他們對抗啊！"
     persona: "AhMing"
     waitFor: dialogueClosed
     nextStep: 33
@@ -1019,7 +1007,7 @@ steps:
   - stepId: 58 # 標記自由對話階段開始
     type: aiDialogue
     # persona: "AhMing_AI_Chat" # (可選) 指定用於自由對話的特定 AI 配置
-    prompt: "本條消息你作為AI阿明回應：[我覺得看她給我人生帶來很大的力量] 不要增減字符或回應好的，不要自己生成多余內容。" # 設置場景，指示玩家可以開始自由對話
+    prompt: "我覺得看她給我人生帶來很大的力量" # 設置場景，指示玩家可以開始自由對話
     # 假設遊戲引擎會在此處暫停主腳本流程，啟用基於阿明 persona 的 AI 對話繫統
     # 玩家與阿明 AI 互動，直到玩家選擇結束
     persona: "AhMing"
@@ -1098,7 +1086,7 @@ steps:
 
   - stepId: 69
     type: aiDialogue # 主角醒後的內心獨白，誤解夢境，對 Kiera 產生情感
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你（阿強）剛從那個混亂的噩夢中驚醒，心有余悸。（內心獨白）剛才那個夢…太真實了…那個掙紮的女人…是 Kiera 嗎？為什麼會夢到她出事？還有那個聲音…'重復'…到底是什麼意思？難道…是因為白天看了她的直播，又聽阿明說了那麼多？日有所思，夜有所夢？可那種恐懼感…不像假的。她那樣光鮮亮麗，是不是也隱藏著什麼危險？或者…我只是…開始有點擔心她了？" # 將夢境與 Kiera 聯繫，產生擔憂/保護欲（愛欲的萌芽），忽略了其他可能性
+    prompt: "我剛從那個混亂的噩夢中驚醒，心有余悸。（內心獨白）剛才那個夢…太真實了…那個掙紮的女人…是 Kiera 嗎？為什麼會夢到她出事？還有那個聲音…'重復'…到底是什麼意思？難道…是因為白天看了她的直播，又聽阿明說了那麼多？日有所思，夜有所夢？可那種恐懼感…不像假的。她那樣光鮮亮麗，是不是也隱藏著什麼危險？或者…我只是…開始有點擔心她了？" # 將夢境與 Kiera 聯繫，產生擔憂/保護欲（愛欲的萌芽），忽略了其他可能性
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 70 # 夢境結束，主角帶著對 Kiera 的錯誤解讀和新產生的情感進入新的一天
@@ -1112,7 +1100,7 @@ steps:
     nextStep: 71
   - stepId: 71
     type: aiDialogue # Qiang 思考 Kiera, 掙紮是否要聯繫她
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你（阿強）坐在床邊，回憶著昨晚的夢和 Kiera 直播時的異常。（內心獨白）那個夢… 還有她直播時的樣子… 真的只是巧合嗎？她看起來那麼光鮮，會不會… 真的有什麼危險？我該不該… 提醒她？怎麼提醒？一個陌生人發去奇怪的警告… 她只會把我當成瘋子或者騷擾者吧？而且… 我又能做什麼呢？連自己是誰都搞不清楚…" # 擔心 Kiera，但因自身狀況和缺乏依據而猶豫
+    prompt: "我坐在床邊，回憶著昨晚的夢和 Kiera 直播時的異常。（內心獨白）那個夢… 還有她直播時的樣子… 真的只是巧合嗎？她看起來那麼光鮮，會不會… 真的有什麼危險？我該不該… 提醒她？怎麼提醒？一個陌生人發去奇怪的警告… 她只會把我當成瘋子或者騷擾者吧？而且… 我又能做什麼呢？連自己是誰都搞不清楚…" # 擔心 Kiera，但因自身狀況和缺乏依據而猶豫
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 72
@@ -1252,7 +1240,7 @@ steps:
   - stepId: work_8
     type: aiDialogue
     persona: "Protagonist_Internal"
-    prompt: "system: 你將繼續和玩家討論（該指令為繫統指令，玩家不可見，請接著聊天歴史）本條消息回應：[而後我又想起來那個夢中的女人，她是誰？為什麼我總能在她的背影中看到Kiera。那個女人是誰，我夢見的手中的碎片是什麼，那是一個芯片？] 不要增減字符或回應好的。"
+    prompt: "而後我又想起來那個夢中的女人，她是誰？為什麼我總能在她的背影中看到Kiera。那個女人是誰，我夢見的手中的碎片是什麼，那是一個芯片？"
     waitFor: "dialogueClosed"
     nextStep: work_9
 
@@ -1407,7 +1395,7 @@ steps:
     nextStep: kiera_interaction_2
   - stepId: kiera_interaction_2
     type: aiDialogue
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你（阿強）面對Kiera的鏡頭和略帶調侃的稱呼，感到有些不自在，但還是盡力保持禮貌。你開始准備她點的涼茶，同時暗中觀察著Kiera和她的團隊。你註意到她雖然笑容滿面，但眼神偶爾會掠過店裏那些陳舊的物件，似乎在尋找什麼，又或者在回憶什麼。她的助理則在不停地調整機位，確保直播效果。本條消息回應：（內心獨白）她到底為什麼會來這種地方？真的是為了直播效果，還是…別有目的？她對這家店…或者說，對這家店代錶的這種“舊香港”，到底是什麼態度？她知道這家店快要倒閉了嗎？如果知道，她會怎麼想？還有…她剛才看我的那一眼，總覺得有點…探究的意味。不要增減任何字符或回應好的"
+    prompt: "我面對Kiera的鏡頭和略帶調侃的稱呼，感到有些不自在，但還是盡力保持禮貌。你開始准備她點的涼茶，同時暗中觀察著Kiera和她的團隊。你註意到她雖然笑容滿面，但眼神偶爾會掠過店裏那些陳舊的物件，似乎在尋找什麼，又或者在回憶什麼。她的助理則在不停地調整機位，確保直播效果。本條消息回應：（內心獨白）她到底為什麼會來這種地方？真的是為了直播效果，還是…別有目的？她對這家店…或者說，對這家店代錶的這種“舊香港”，到底是什麼態度？她知道這家店快要倒閉了嗎？如果知道，她會怎麼想？還有…她剛才看我的那一眼，總覺得有點…探究的意味。"
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: kiera_interaction_3
@@ -1540,7 +1528,7 @@ steps:
   - stepId: kiera_chat_1
     type: aiDialogue
     persona: "Kiera"
-    prompt: "system:（該指令為繫統指令，玩家不可見，請接著聊天歴史）本條消息請輸出：[Hello! 怎麼啦，是我有什麼東西落在店裏了嗎？] 不要增減字符或回應好的。"
+    prompt: "Hello! 怎麼啦，是我有什麼東西落在店裏了嗎？"
     waitFor: "dialogueClosed"
     nextStep: ming_0
     
@@ -1612,7 +1600,7 @@ steps:
   - stepId: 94
     type: aiDialogue
     persona: "AhMing"
-    prompt: "system: 你將繼續和玩家討論記憶問題（該指令為繫統指令，玩家不可見，請接著聊天歴史）本條消息回應：[可是我們是怎麼想起來的呢？] 不要增減字符或回應好的。"
+    prompt: "可是我們是怎麼想起來的呢？"
     waitFor: "dialogueClosed"
     nextStep: 95
 
@@ -1703,7 +1691,7 @@ steps:
   - stepId: 108
     type: aiDialogue
     persona: "AhMing"
-    prompt: "system: 接下來你會繼續和玩家聊一會天，除了約定好這個，你可以主動問玩家一些事。本條消息回應：[(*緊張地搓手* 好...周六淩晨4點，趁巡邏AI換班時？我用生物柴油發電機，不會觸發碳排警報。)], 不要增減字符或回復好的"
+    prompt: "*緊張地搓手* 好...周六淩晨4點，趁巡邏AI換班時？我用生物柴油發電機，不會觸發碳排警報。"
     waitFor: "dialogueClosed"
     nextStep: 109
 
@@ -1842,7 +1830,7 @@ steps:
 
   - stepId: 129
     type: aiDialogue # Protagonist's internal reaction to Echo's message after the failure
-    prompt: "接下來你就是用戶，下面你和用戶的討論是自我獨白或自我想法的延伸，你（阿強）剛和阿明經歴了追捕，躲在廢棄倉庫裏，身心俱疲。你看著終端上 Echo 發來的新消息：'嚮四方揮灑的憐憫，如同潑灑在沙地上的水，瞬間幹涸。不要滋養無根的野草。跟隨那唯一的裂痕。' （內心獨白）'潑灑在沙地上的水'…它是在說我們剛才做的事嗎？是在嘲笑我們的失敗？'不要滋養無根的野草'…那些需要幫助的人，在它看來只是'野草'？這聲音…越來越冷酷了。'唯一的裂痕'…它到底想讓我做什麼？是放棄這種徒勞的掙紮，去尋找某種…更根本的東西？這感覺…很危險，但又好像…隱隱觸碰到了我失落的某一部分…" # Internal conflict intensified: the failure makes Echo's cynical view more potent, the "singular path" feels both menacing and strangely compelling
+    prompt: "我剛和阿明經歴了追捕，躲在廢棄倉庫裏，身心俱疲。你看著終端上 Echo 發來的新消息：'嚮四方揮灑的憐憫，如同潑灑在沙地上的水，瞬間幹涸。不要滋養無根的野草。跟隨那唯一的裂痕。' （內心獨白）'潑灑在沙地上的水'…它是在說我們剛才做的事嗎？是在嘲笑我們的失敗？'不要滋養無根的野草'…那些需要幫助的人，在它看來只是'野草'？這聲音…越來越冷酷了。'唯一的裂痕'…它到底想讓我做什麼？是放棄這種徒勞的掙紮，去尋找某種…更根本的東西？這感覺…很危險，但又好像…隱隱觸碰到了我失落的某一部分…" # Internal conflict intensified: the failure makes Echo's cynical view more potent, the "singular path" feels both menacing and strangely compelling
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: sync_checkpoint_after_dream_and_echo # New next step for data sync
