@@ -1,6 +1,7 @@
 # IdeActuator Demo (SVM_net) ✨
 
-Welcome to the IdeActuator Demo (SVM_net) project! This is a frontend prototype exploring the vision of transforming urban spaces into interactive game worlds using AI, smart devices (like simulated Smart Vending Machines - SVMs), mobile interfaces, and game mechanics.
+Welcome to the IdeActuator Demo (SVM_net) project! This is a frontend prototype (with a simple flask backend) exploring the vision of transforming urban spaces into interactive game worlds using AI, smart devices (like simulated Smart Vending Machines - SVMs), mobile interfaces, and game mechanics.
+If you are interested in it, please contact me with my email: zzhouch@connect.ust.hk
 
 **Vision:** To create engaging, location-based experiences that blend the virtual and real, making the city itself a playground.
 
@@ -27,7 +28,7 @@ Welcome to the IdeActuator Demo (SVM_net) project! This is a frontend prototype 
 *   **Specialized Task Panels:**
     *   `TaskOfferPanel`: Displays standard task offers with Accept/Decline options.
     *   `CodeEntryTaskPanel`: Handles specific tasks requiring code input (e.g., hacking, data extraction), publishing `task_outcome` events (success/failure).
-*   **Core Gameplay Loop Demo:** The `svm03_anomaly.yaml` and `svm05_data_heist_main.yaml` scripts demonstrate triggering, dialogue, task offering (standard and code entry), state updates, event waiting, and branching.
+*   **Core Gameplay Loop Demo:** The `HK_2085_Love_Isaac.yaml` script demonstrate triggering, dialogue, task offering (standard and code entry), state updates, event waiting, and branching.
 *   **Puzzle System:** Implements a comprehensive puzzle system with clue logs and interactive elements for engaging gameplay.
 *   **Map Navigation:** Provides navigational aids to enhance location-based interactions within the game world.
 
@@ -189,8 +190,7 @@ graph LR
 
 ### Mapbox
 
-*   A Mapbox access token is required to render the map. Currently, a public token is hardcoded in `src/views/MapView.jsx`.
-*   For production or more robust development, this should be moved to environment variables (e.g., `.env` file and accessed via `import.meta.env.VITE_MAPBOX_TOKEN`).
+*   A Mapbox access token is in the environment variables (e.g., `.env` file and accessed via `import.meta.env.VITE_MAPBOX_TOKEN`).
 
 ## 📦 Building for Android with Capacitor
 
@@ -291,14 +291,6 @@ The project is currently in the development or testing phase, demonstrating comp
 3.  **Temporary Code:** Presence of temporary code that needs to be replaced with permanent solutions.
 4.  **Error Handling:** Unresolved error handling issues that need to be addressed for robustness.
 
-**Next Steps (Towards "Fun"):**
-1.  **AI Tool Calling:** Implement LLM function/tool calling to allow the AI to query game state (`get_svm_details`) or trigger game events (`publish_event`). (See `docs/architecture_plan.md`)
-2.  **Richer Gameplay Loops:** Design more engaging sequences involving resources, reputation, or mini-games, leveraging the centralized world state and AI tools.
-3.  **Persistence Enhancements:** Expand `localStorage` persistence or explore more robust solutions.
-4.  **Visual & Interaction Polish:** Improve UI/UX, add animations, refine aesthetics.
-5.  **API Key Security:** Implement a backend proxy for secure API key handling (Essential before any public deployment).
-
-*(See `docs/architecture_plan.md` for more details on the evolution plan).*
 
 ## 🙌 Contributing
 
