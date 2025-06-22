@@ -79,7 +79,7 @@ useEffect(() => {
           }
         };
         tools.push(favorabilityTool);
-        systemPromptContent += `\n\n--- 好感度系统指令 ---\n你正在扮演的角色有一个好感度指数，当前值为 ${personaState.favorability} (范围0-100)。你需要根据用户的言行，在对话的适当时候，秘密地使用 'update_favorability' 工具来调整这个值。这个调整过程对用户是不可见的。调整后，请根据新的好感度继续你的对话。`;
+        systemPromptContent += `\n\n--- 好感度系统指令 ---\n你正在扮演的角色有一个好感度指数，当前值为 ${personaState.favorability} (范围0-100)。这是一个至关重要的游戏机制。在你的每一次回复中，你都【必须】首先评估用户上一句话对你好感度的影响，然后以'update_favorability(数值)'的格式，在你的回复内容的最前面、独立成一行输出这个指令。例如：'update_favorability(5)' 或 'update_favorability(-2)'。如果用户的话语是中立的，则【必须】输出 'update_favorability(0)'。这个指令对用户是不可见的，系统会自动处理。完成指令输出后，换行，然后再开始你的角色扮演对话。绝对不能省略指令。示例回复格式：\nupdate_favorability(3)\n啊，你这么说我真开心！`;
       }
 
       const systemMessage = { role: 'system', content: systemPromptContent };
@@ -130,6 +130,8 @@ useEffect(() => {
             console.log(`[ChatWindow] Found inline favorability update: ${match[0]}. Changing by ${favorabilityChange} for ${persona.id}.`);
             updatePersonaFavorability(persona.id, favorabilityChange);
             messageContent = messageContent.replace(favorabilityRegex, '').trim();
+          } else {
+            console.log(`[ChatWindow] No inline favorability update found in AI response.`);
           }
 
           if (messageContent) {

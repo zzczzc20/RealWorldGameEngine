@@ -236,6 +236,8 @@ function AIChatContainer({ isVisible, onClose, apiProvider, apiKey, language, on
         console.log(`[AIChatContainer] Found favorability update: ${match[0]}. Changing by ${favorabilityChange} for ${characterIdForMessage}.`);
         updatePersonaFavorability(characterIdForMessage, favorabilityChange);
         messageContent = messageContent.replace(favorabilityRegex, '').trim();
+      } else {
+        console.log(`[AIChatContainer] No favorability update found in AI dialogue response for step ${aiMessageStepIdentifier}.`);
       }
       
       if (!messageContent) {
