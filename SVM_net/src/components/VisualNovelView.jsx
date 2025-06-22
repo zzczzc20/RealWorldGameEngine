@@ -17,9 +17,9 @@ function VisualNovelView({ step, onNext, onChoice }) {
     if (text) {
       let i = 0;
       const intervalId = setInterval(() => {
-        setDisplayedText(prev => prev + text.charAt(i));
         i++;
-        if (i > text.length) {
+        setDisplayedText(text.slice(0, i));
+        if (i >= text.length) {
           clearInterval(intervalId);
         }
       }, 50);
