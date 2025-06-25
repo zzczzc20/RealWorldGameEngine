@@ -1,0 +1,419 @@
+scriptId: HK_2085_Obstacle
+title: "香港2085：障礙"
+trigger: # 假設在第一章結束後自動觸發
+  event: 'script_completed'
+  scriptId: 'HK_2085_Love_Isaac'
+entry: 200
+
+steps:
+  - stepId: 200 # 章節開始，承接第一章結尾
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    image: /assets/images/warehouse_aftermath.png # TODO: 需要一張主角和阿明在廢棄倉庫角落的圖片，光線昏暗，氣氛頹喪，兩人身上有汙漬。
+    audio: /assets/audio/city_rumble_low.mp3 # TODO: 需要一段低沉的城市背景音，混合著遠處的警笛和雨滴聲。
+    text: "倉庫的黑暗像一塊濕冷的布，包裹著你和阿明的沉默。派飯行動的失敗，像一記悶棍，敲碎了阿明最後一點光。而你口袋裏終端上'回聲'那冰冷的詞句，則在你的腦海中反復迴響。"
+    nextStep: 201
+
+  - stepId: 201
+    type: dialogue
+    persona: "AhMing"
+    text: "（聲音沙啞，充滿失敗感）…都沒了。什麼都做不了…強哥，也許你說得對，也許我爸當年…也是這樣無力，所以才消失的吧…" # 阿明將失敗與父親的失蹤聯繫起來，更顯絕望。
+    nextStep: 202
+
+  - stepId: 202
+    type: dialogue
+    persona: "Player"
+    owner: "AhMing"
+    text: "（看著失魂落魄的阿明，你不知如何安慰。'不要滋養無根的野草'…'回聲'的話語讓你感到一陣寒意。你拿出Kiera給的那張帶有奇特符號的名片。）阿明，先別想了。我們得先離開這裏。我…我還有點事要做。"
+    nextStep: 203
+
+  - stepId: 203
+    type: dialogue
+    persona: "Protagonist_Internal"
+    image: /assets/images/kiera_new_card_closeup.png # TODO: 需要主角手機屏幕特寫，顯示Kiera那張帶有神秘符號的新名片，符號清晰可見。
+    text: "'唯一的裂痕'…'回聲'是想讓我從這裏查起嗎？這個符號…它到底代表什麼？Kiera…你究竟是誰？" # 主角決定將註意力轉向Kiera的線索。
+    nextStep: 204
+
+  - stepId: 204
+    type: UNLOCK_CLUE
+    clueId: "Kiera_new_card" # 解鎖線索：帶有神秘符號的Kiera名片
+    nextStep: 205
+
+  - stepId: 205 # 開始調查符號
+    type: dialogue
+    persona: "Protagonist_Internal"
+    text: "回到我那狹小的房間，我嘗試用終端掃描那個符號，在公共網絡上進行圖像搜索。結果…一無所獲。它就像一個不存在於這個時代的印記，乾淨得令人不安。"
+    nextStep: 206
+
+  - stepId: 206
+    type: dialogue
+    persona: "Echo"
+    text: "光會說謊，塵埃儲存記憶。去往文字被遺忘的墳場。" # Echo給出新的、更具體的指令，暗示需要尋找物理的、陳舊的資料。
+    nextStep: 207
+
+  - stepId: 207
+    type: aiDialogue
+    prompt: "我思考著'回聲'的話。'文字被遺忘的墳場'…是指圖書館？還是…檔案館？我想起來，在城市重建的浪潮中，有一個'亞洲文獻與設計資料中心'被保留了下來，收藏著大量舊時代的資料。也許，我該去那裏看看。"
+    persona: "Protagonist_Internal"
+    waitFor: dialogueClosed
+    nextStep: 207_1
+
+  - stepId: 207_1
+    type: updateWorldState
+    target: persona
+    id: "Librarian"
+    property: requiresChatWindow
+    value: true
+    nextStep: 208
+
+  - stepId: 208 # 前往資料中心
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    image: /assets/images/archive_interior.png # TODO: 需要資料中心內部全景圖，巨大的書架，空氣中漂浮著灰塵，光線從高窗射入，形成光柱。一個老舊的查詢終端在畫面一角。
+    characters:
+      - id: Librarian # TODO: 需要一位年長的圖書管理員立繪，戴著老花鏡，表情有些嚴肅但眼神深邃。
+        sprite: /assets/images/librarian_sprite.png
+        position: left
+    text: "資料中心內部異常安靜，與外界的喧囂彷彿兩個世界。空氣中是舊紙張和防腐劑混合的味道。一位年長的管理員從高大的書架後走了出來，打量著我這個不速之客。"
+    nextStep: 208_1
+
+  - stepId: 208_1
+    type: dialogue
+    persona: "Librarian"
+    text: "年輕人，這裏可不是給網紅打卡的地方。你要找什麼？我們這裏的資料，大部分在網絡上都找不到複製品。"
+    nextStep: 208_2
+
+  - stepId: 208_2
+    type: dialogue
+    persona: "Player"
+    owner: "Librarian"
+    text: "（我展示了終端上的符號）您好，我想查找關於這個設計符號的資料。它可能和一位舊時代的設計師有關。"
+    nextStep: 208_3
+
+  - stepId: 208_3
+    type: dialogue
+    persona: "Librarian"
+    text: "（管理員扶了扶眼鏡，湊近看了看）這個符號…有點印象。很久沒人來問過了。它屬於一個…充滿爭議的人。跟我來吧，用那個舊終端查查看，新系統可能已經把它過濾掉了。"
+    nextStep: 209
+
+  - stepId: 209 # 觸發謎題
+    type: ACTIVATE_PUZZLE
+    puzzleId: "symbolArchivePuzzle" # 激活符號檔案謎題
+    nextStep: 210
+
+  - stepId: 210
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "終端的資料庫很龐大，但許多內容都已損壞或被加密。我必須從這些殘缺的碎片中，找到與符號相關的設計師或流派。"
+    # 謎題描述：symbolArchivePuzzle
+    # 類型：多階段信息拼湊與邏輯推理。
+    # 界面：一個模擬的舊式資料庫界面。左邊是Kiera名片上的符號，右邊是搜索結果，顯示多個殘缺的文檔條目。
+    # 階段一：玩家需要點擊不同的文檔碎片，閱讀關於不同設計流派的描述。大部分是無關的，但有幾個提到了“反諷美學”、“異質空間”、“對主流秩序的冷峻戲仿”。
+    # 階段二：將這些相關的描述拖拽到一個“線索板”上，會觸發關鍵詞高亮，如“反諷”、“疏離”、“K”。
+    # 階段三：使用這些關鍵詞進行高級搜索，會得到一份幾乎完全損毀的設計師檔案，標題只剩下“__G_”和“__F__”。檔案中有一句清晰可見的話：“我的設計，是獻給這個荒誕世界最真誠的玩笑。”
+    # 解決方案：玩家需要在輸入框中，根據線索組合出設計師的名字 "KGF"。
+    nextStep: 211
+
+  - stepId: 211
+    type: WAIT_FOR_PUZZLE_SOLVED
+    puzzleId: "symbolArchivePuzzle"
+    nextStep: 212
+    stepIdOnWait: 213
+
+  - stepId: 212 # 謎題解決
+    type: dialogue
+    persona: "Protagonist_Internal"
+    text: "KGF…就是這個名字。資料顯示他是一位活躍於21世紀中葉的建築設計師，以極度超前和怪誕的風格聞名，但在主流視野中被刻意遺忘。這個符號，是他的個人簽名。"
+    nextStep: 212_1
+
+  - stepId: 212_1
+    type: dialogue
+    persona: "Librarian"
+    text: "（看到我解開了謎題，管理員點了點頭）想起來了，KGF。一個天才，也是一個悲劇。他的理念太危險，不容於他的兒子——現在的KF集團掌門人。他最後的作品，一個叫'工廠社區'的實驗項目，就在觀塘那邊，現在應該已經是廢墟了吧。說起來，他家裏的悲劇也不少，我記得他有個兒媳，也是個很有才華的設計師，後來…唉，也是一言難盡。" # 暗示KM/Sera的存在和悲劇，並點出涼茶鋪所在地的起源。
+    nextStep: 214
+
+  - stepId: 213 # 等待謎題解決時的循環提示
+    type: dialogue
+    persona: "Echo"
+    text: "拼湊那些被撕碎的。名字就藏在他們對他的描述裏。"
+    nextStep: 211
+
+  - stepId: 214
+    type: UNLOCK_CLUE
+    clueId: "KGF_profile" # 解鎖線索：關於KGF的初步資料
+    nextStep: 214_1
+    
+  - stepId: 214_1
+    type: UNLOCK_CLUE
+    clueId: "KGF_studio_location" # 解鎖線索：KGF廢棄工作室的地點
+    nextStep: 215
+
+  - stepId: 215 # 調查KGF後，回到涼茶鋪，發現情況惡化
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "帶著KGF這個沉重的名字和'工廠社區'的線索，我離開了資料中心。一種預感讓我先繞回了唐樓。還沒到街角，就聽到涼茶鋪那邊傳來爭吵聲。"
+    image: /assets/images/teashop_trouble_1.png # TODO: 需要一張涼茶鋪門口的圖片，阿明和外婆面色凝重，幾個穿著供應商制服的人在和他們理論，地上散落著一些藥材。
+    nextStep: 215_1
+
+  - stepId: 215_1
+    type: dialogue
+    persona: "AhMing"
+    text: "（看到主角，焦急地喊道）強哥！你看看！我們常年進貨的那幾家藥材行，今天突然集體斷供！說什麼我們的信譽有問題！這不是明擺著要逼死我們嗎！"
+    nextStep: 216
+
+  - stepId: 216
+    type: dialogue
+    persona: "AhMing_Grandma"
+    text: "（婆婆的臉色比上次更差了，她撐著櫃檯，不住地咳嗽）…一輩子本本分分做生意…到老了，卻要受這種氣…咳咳…"
+    nextStep: 218
+
+  - stepId: 218
+    type: dialogue
+    persona: "Echo"
+    text: "他們的苦難是必要的噪音，用以定位裂痕的源頭。不要被噪音迷惑。" # Echo再次發出冷酷指令，強化主角的倫理困境。
+    nextStep: 219
+
+  - stepId: 219
+    type: aiDialogue
+    prompt: "我看著病倒的婆婆和手足無措的阿明，又想到'回聲'那毫無溫度的指令，內心劇烈地掙扎。幫助他們，似乎是天經地義的選擇，但這會不會只是徒勞？就像在沙地上潑水一樣？而追尋KGF的線索，又感覺像是在背棄眼前活生生的苦難。我該怎麼辦？"
+    persona: "Protagonist_Internal"
+    waitFor: dialogueClosed
+    nextStep: 220
+
+  - stepId: 220 # 主角決定聯繫Kiera
+    type: dialogue
+    persona: "Protagonist_Internal"
+    text: "也許…Kiera能提供答案。她既然給了我這個符號，就一定知道些什麼。我必須聯繫她。"
+    nextStep: 221
+
+  - stepId: 221
+    type: dialogue
+    persona: "Player"
+    owner: "Kiera" # 使用新的聯繫方式
+    text: "Kiera小姐，我是上次在涼茶鋪為你調制‘昨日回響’的人。我找到了符號的含義，它指向KGF。"
+    nextStep: 222
+
+  - stepId: 222
+    type: dialogue
+    persona: "Kiera"
+    text: "（信息過了很久才回覆）…你居然真的找到了。我很驚訝。看來你比我想象的更有趣。我們見一面吧，去他留下的一個地方。有些東西，或許你該親眼看看。地址我稍後發你。" # Kiera的回應，既有驚訝，也保持著距離感。
+    nextStep: 223
+
+  - stepId: 223 # 第二次會面
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    image: /assets/images/kgf_studio_exterior.png # TODO: 需要一個被廢棄的展覽空間或工作室的外部圖，充滿KGF風格的怪誕設計，但已蒙上灰塵，大門緊鎖。
+    text: "Kiera發來的地點，是一處位於工業區邊緣的廢棄建築，據說也是KGF當年的工作室之一。Kiera獨自一人在這裏等我，穿著便服，沒有了直播時的光鮮，多了一絲迷惘。"
+    nextStep: 223_1
+
+  - stepId: 223_1
+    type: dialogue
+    persona: "Kiera"
+    characters:
+      - id: Kiera # TODO: 需要Kiera的便服立繪，表情略帶迷惘和好奇。
+        sprite: /assets/images/kiera_casual_sprite.png
+        position: left
+    text: "這裏…是我祖父KGF留下的地方。我父親（KF）不喜歡這裏，覺得它不切實際。但我偶爾會偷偷跑來。我總覺得，這裏藏著一些…被遺忘的東西。" # Kiera透露符號與KGF的關係，並無意中提及KF，但主角此時不知KF是誰。
+    nextStep: 224
+
+  - stepId: 224
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    image: /assets/images/kgf_studio_interior.png # TODO: 需要工作室內部圖，散落著設計圖紙、模型，牆上有一個巨大的、複雜的建築藍圖。
+    text: "工作室內部比外面看起來更大，像一個小型的迷宮。牆上掛著一些怪異的設計圖，其中一張名為'舟'的島嶼設計圖吸引了我的注意。Kiera似乎沒注意到，她徑直走向一個佈滿灰塵的角落。" # 暗示Sera的“舟”計劃。
+    nextStep: 225
+
+  - stepId: 225
+    type: dialogue
+    persona: "Kiera"
+    text: "（她指著牆角一個沒有佩戴任何首飾、表情疏離的女性人體模型）我聽說，我母親…也有著類似的審美，非常簡潔，甚至可以說是嚴苛。跟我完全不一樣，對吧？" # 暗示KM/Sera的風格，製造對比，加深詭計。
+    nextStep: 226
+
+  - stepId: 226
+    type: dialogue
+    persona: "Kiera"
+    text: "我父親說我祖父最後是沉迷於自己的幻想裏，才被時代淘汰的。但我有時候會做一些奇怪的夢，夢到火焰、舞台、失控的人群…感覺和他的設計有些關係。就像我…我以前也嘗試過一些更大膽、更實驗性的直播，但效果不好，太壓抑了，就放棄了。（她輕描淡寫地說）可能我們家的人，骨子裏都有點瘋狂吧。" # 核心詭計：種下“KM=Kiera早期”的誤導。
+    nextStep: 226_1
+
+  - stepId: 226_1
+    type: dialogue
+    persona: "Protagonist_Internal"
+    text: "她的話讓我感到一陣寒意。夢境、火焰、失控的人群…這和我的夢境何其相似。她的'實驗性直播'，難道就是…？我看向房間中央那個巨大的建築藍圖，它似乎是一個互動裝置。"
+    nextStep: 227
+
+  - stepId: 227
+    type: ACTIVATE_PUZZLE
+    puzzleId: "KGF_Blueprint_Puzzle" # 激活新謎題
+    nextStep: 227_1
+    
+  - stepId: 227_1
+    type: dialogue
+    persona: "Kiera"
+    text: "這是祖父留下的互動藍圖，他說'真正的結構，誕生於矛盾的統一'。我從沒搞懂過。"
+    # 謎題描述：KGF_Blueprint_Puzzle
+    # 類型：空間邏輯與哲學理念結合。
+    # 界面：一個巨大的全息建築藍圖，可以旋轉和縮放。藍圖上有幾個關鍵節點是錯位的。旁邊有幾條KGF的筆記。
+    # 謎題線索：筆記1：“庇護所即是牢籠。” 筆記2：“出口即是陷阱。” 筆記3：“最穩固的支撐，來自於虛空。”
+    # 謎題邏輯：玩家需要根據這些充滿悖論的哲學提示來調整藍圖。例如，將代表“安全區”的模塊旋轉180度，使其出口朝向內部，形成一個封閉結構。將一個看似是“承重柱”的實體結構替換為一個“留白”的空間。
+    # 解決方案：當所有模塊都按照悖論邏輯調整好後，藍圖會投射出一道光，指向牆上一個偽裝成通風口的暗格。暗格的開關，是一個倒置的“感嘆號”形狀。 (暗示Sera的標誌)
+    nextStep: 228
+
+  - stepId: 228
+    type: WAIT_FOR_PUZZLE_SOLVED
+    puzzleId: "KGF_Blueprint_Puzzle"
+    nextStep: 229
+    stepIdOnWait: 228_1
+
+  - stepId: 228_1
+    type: dialogue
+    persona: "Echo"
+    text: "真理藏於反面。秩序生於混沌。" # Echo的提示
+    nextStep: 228
+
+  - stepId: 229
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "藍圖發出的光指向了牆壁。我按下了那個倒置感嘆號形狀的開關，一個暗格悄然滑開。裏面靜靜地躺著一個老舊的數據晶片。"
+    nextStep: 229_1
+
+  - stepId: 229_1
+    type: dialogue
+    persona: "Kiera"
+    text: "（她眼中充滿驚訝）你…你真的打開了。這裏面，是他的一些私人日誌和未公開的設計理念。密碼…是他的一句口頭禪，關於'表演'的。我一直沒解開。或許，對'過去的故事'執著的你，能找到答案。就當是…我對你解開符號的回報吧。"
+    nextStep: 230
+
+  - stepId: 230
+    type: ACTIVATE_PUZZLE
+    puzzleId: "KM_archive_puzzle" # 激活KM記錄檔案謎題
+    nextStep: 230_1
+
+  - stepId: 230_1
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "我接過晶片，插入終端。一個加密的檔案庫出現了，需要密碼才能訪問。"
+    # 謎題描述：KM_archive_puzzle
+    # 類型：文本理解與概念推理。
+    # 界面：一個加密檔案的登錄界面，有密碼輸入框和一個“提示”按鈕。
+    # 謎題線索：點擊“提示”，會顯示KGF的一句話：“最純粹的表演，需要將舞台本身也一同獻祭。”
+    # 謎題邏輯：這句話暗示了徹底的、毀滅性的、帶有儀式感的行動。“獻祭”、“舞台”是關鍵。玩家需要理解其背後的極端概念。
+    # 解決方案：密碼是 "淨化" (PURIFICATION)。這既符合KGF的反諷危險性，也符合KM後來偏執的理念。
+    nextStep: 231
+
+  - stepId: 231
+    type: WAIT_FOR_PUZZLE_SOLVED
+    puzzleId: "KM_archive_puzzle"
+    nextStep: 232
+    stepIdOnWait: 231_1
+
+  - stepId: 231_1 # 等待謎題解決時的循環提示
+    type: dialogue
+    persona: "Echo"
+    text: "當演員消失，觀眾消失，只剩下行為本身。那是什麼？" # Echo的提示，指向行為的本質。
+    nextStep: 231
+    
+  - stepId: 232 # 謎題解決，核心詭計內容出現
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "密碼正確。檔案庫解鎖。但裏面的內容…並不是設計圖或哲學筆記。而是一段段加密的音頻日誌。"
+    nextStep: 233
+
+  - stepId: 233
+    type: UNLOCK_CLUE
+    clueId: "KM_audio_logs" # 解鎖線索：KM的音頻日誌（主角誤認為是Kiera的）
+    nextStep: 234
+
+  - stepId: 234 # 播放被誤解的音頻日誌片段
+    type: dialogue
+    persona: "KM_Audio" # 一個新的persona，聲音聽起來像年輕女性，充滿激情和偏執
+    audio: /assets/audio/km_log_1.mp3 # TODO: 需要音頻，女聲，語氣狂熱而充滿煽動性。
+    text: "（音頻1）…這不是娛樂，這是一場演出！一場喚醒所有沉睡者的演出！那些被遺棄在'管道'裏的人，將成為第一批觀眾，也是第一批演員！" # 提及“管道”，與Sera補充說明對應。
+    nextStep: 235
+
+  - stepId: 235
+    type: dialogue
+    persona: "KM_Audio"
+    audio: /assets/audio/km_log_2.mp3 # TODO: 需要音頻，女聲，語氣變得冰冷而堅定，充滿使命感。
+    text: "（音頻2）…父親的壓迫，和他那庸俗的秩序，必須被打破。祖父的理念將由我來實現！我們將建造'方舟'，帶領信徒離開這片虛偽的土地！那些無法理解的，將在火焰中得到淨化！" # 提及“方舟(舟)”和“淨化”，與Sera補充說明對應。
+    nextStep: 236
+
+  - stepId: 236
+    type: aiDialogue
+    prompt: "我震驚地聽著這些錄音。這聲音…無疑是Kiera的，但語氣和內容卻像完全變了一個人。充滿了偏執的激情和危險的思想。'管道'？'方舟'？這都是什麼？'父親的壓迫'？是指KF嗎？'祖父的理念'？她想繼承KGF的什麼？'火焰'…'淨化'…難道她正在策劃某種可怕的恐怖襲擊或大型破壞活動？她光鮮的網紅外表下，竟然隱藏著這樣黑暗的一面？"
+    persona: "Protagonist_Internal"
+    waitFor: dialogueClosed
+    nextStep: 236_1
+
+  - stepId: 236_1
+    type: updateWorldState
+    target: persona
+    id: "KF_Lawyer"
+    property: requiresChatWindow
+    value: true
+    nextStep: 237
+
+  - stepId: 237 # 章節高潮
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "就在我被這驚人的發現衝擊得頭腦混亂時，我的終端突然收到了阿明發來的緊急通訊，他的聲音充滿了恐慌。"
+    nextStep: 238
+
+  - stepId: 238
+    type: dialogue
+    persona: "AhMing"
+    text: "強哥！快來涼茶鋪！KF地產的人來了！他們帶著正式文件，說我們消防設施不合格，要我們立刻停業！我外婆…我外婆被他們氣得暈過去了！"
+    image: /assets/images/teashop_trouble_2.png # TODO: 需要手機通訊界面，阿明的頭像劇烈晃動，背景是混亂的涼茶鋪，可以看到穿西裝的人和倒在地上的婆婆的衣角。
+    nextStep: 238_1
+
+  - stepId: 238_1
+    type: dialogue
+    persona: "KF_Lawyer"
+    owner: "AhMing"
+    characters:
+      - id: KF_Lawyer # TODO: 需要KF律師的立繪，西裝革履，表情冷漠，戴著金絲眼鏡。
+        sprite: /assets/images/lawyer_sprite.png
+        position: right
+    text: "（電話背景音傳來一個冷漠的聲音）這位先生，請保持冷靜。我們是依法辦事。這片區域，包括這家店鋪，都屬於'工廠社區遺址活化項目'的一部分。拒不配合，我們將採取強制措施。" # KF勢力正式登場，並扭曲歷史為己用。
+    nextStep: 239
+
+  - stepId: 239
+    type: dialogue
+    persona: "Echo"
+    text: "障礙正在崩塌。裂痕已清晰可見。跟隨它，不要回頭。這是唯一的路。" # Echo在此刻發出最強硬的指令，要求主角放棄倫理，追尋真相。
+    nextStep: 240
+
+  - stepId: 240
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "一邊是倒下的婆婆和阿明絕望的哭喊，一邊是通往我身世之謎的唯一線索。'回聲'的指令前所未有地清晰和急迫，而KF地產的出現，讓所有苦難都有了具體的源頭。我站在了命運的十字路口，時間仿佛在此刻凝固。"
+    nextStep: 241
+
+  - stepId: 241 # 最終抉擇
+    type: choices
+    choices:
+      - text: "不顧一切，立刻趕回涼茶鋪。"
+        nextStep: 300 # 假設第三章的開頭ID，代表選擇倫理
+      - text: "聽從'回聲'，繼續追查'Kiera'的秘密。"
+        nextStep: 301 # 假設第三章的另一個開頭ID，代表選擇真相
+    
+  - stepId: 300
+    type: dialogue
+    persona: "Narrator"
+    text: "（選擇幫助涼茶鋪）你掛斷了與'回聲'的連接，轉身衝出KGF的工作室，向著那間在風雨中飄搖的涼茶鋪狂奔而去。你選擇了眼前的責任，但那關於過去的巨大謎團，以及'回聲'那不祥的沉默，讓你感到未來更加兇險莫測。"
+    nextStep: -1 # 章節結束，進入第三章
+
+  - stepId: 301
+    type: dialogue
+    persona: "Narrator"
+    text: "（選擇追尋真相）你無視了阿明的求救，雙手顫抖地點開了那份音頻檔案，試圖從中找出更多的線索。你選擇了那條通往深淵的孤絕之路，背後，是現實世界中一個家庭正在崩塌的聲音。你感到自己的一部分，正在變得冰冷而堅硬。"
+    nextStep: -1 # 章節結束，進入第三章
