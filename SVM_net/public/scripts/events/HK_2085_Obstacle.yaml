@@ -1,8 +1,7 @@
 scriptId: HK_2085_Obstacle
 title: "香港2085：障礙"
 trigger: # 假設在第一章結束後自動觸發
-  event: 'script_completed'
-  scriptId: 'HK_2085_Love_Isaac'
+  event: 'game_start'
 entry: 200
 
 steps:
@@ -12,12 +11,24 @@ steps:
     owner: "Protagonist_Internal"
     image: /assets/images/warehouse_aftermath.png # TODO: 需要一張主角和阿明在廢棄倉庫角落的圖片，光線昏暗，氣氛頹喪，兩人身上有汙漬。
     audio: /assets/audio/city_rumble_low.mp3 # TODO: 需要一段低沉的城市背景音，混合著遠處的警笛和雨滴聲。
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     text: "倉庫的黑暗像一塊濕冷的布，包裹著你和阿明的沉默。派飯行動的失敗，像一記悶棍，敲碎了阿明最後一點光。而你口袋裏終端上'回聲'那冰冷的詞句，則在你的腦海中反復迴響。"
     nextStep: 201
 
   - stepId: 201
     type: dialogue
     persona: "AhMing"
+    image: /assets/images/warehouse_aftermath.png # TODO: 需要一張主角和阿明在廢棄倉庫角落的圖片，光線昏暗，氣氛頹喪，兩人身上有汙漬。
+    audio: /assets/audio/city_rumble_low.mp3 # TODO: 需要一段低沉的城市背景音，混合著遠處的警笛和雨滴聲。
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     text: "（聲音沙啞，充滿失敗感）…都沒了。什麼都做不了…強哥，也許你說得對，也許我爸當年…也是這樣無力，所以才消失的吧…" # 阿明將失敗與父親的失蹤聯繫起來，更顯絕望。
     nextStep: 202
 
@@ -156,7 +167,7 @@ steps:
     persona: "Narrator"
     owner: "Protagonist_Internal"
     text: "帶著KGF這個沉重的名字和'工廠社區'的線索，我離開了資料中心。一種預感讓我先繞回了唐樓。還沒到街角，就聽到涼茶鋪那邊傳來爭吵聲。"
-    image: /assets/images/teashop_trouble_1.png # TODO: 需要一張涼茶鋪門口的圖片，阿明和外婆面色凝重，幾個穿著供應商制服的人在和他們理論，地上散落著一些藥材。
+    image: /assets/images/tea_store.png # TODO: 需要一張涼茶鋪門口的圖片，阿明和外婆面色凝重，幾個穿著供應商制服的人在和他們理論，地上散落著一些藥材。
     nextStep: 215_1
 
   - stepId: 215_1
