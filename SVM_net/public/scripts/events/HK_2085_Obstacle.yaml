@@ -9,8 +9,8 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    image: /assets/images/warehouse_aftermath.png # TODO: 需要一張主角和阿明在廢棄倉庫角落的圖片，光線昏暗，氣氛頹喪，兩人身上有汙漬。
-    audio: /assets/audio/city_rumble_low.mp3 # TODO: 需要一段低沉的城市背景音，混合著遠處的警笛和雨滴聲。
+    image: /assets/images/warehouse_aftermath.png
+    audio: /assets/audio/city_rumble_low.mp3
     characters:
       - id: AhMing # 可以同时显示多个角色
         sprite: /assets/images/Ahming_sprite.png
@@ -22,8 +22,8 @@ steps:
   - stepId: 201
     type: dialogue
     persona: "AhMing"
-    image: /assets/images/warehouse_aftermath.png # TODO: 需要一張主角和阿明在廢棄倉庫角落的圖片，光線昏暗，氣氛頹喪，兩人身上有汙漬。
-    audio: /assets/audio/city_rumble_low.mp3 # TODO: 需要一段低沉的城市背景音，混合著遠處的警笛和雨滴聲。
+    image: /assets/images/warehouse_aftermath.png
+    audio: /assets/audio/city_rumble_low.mp3
     characters:
       - id: AhMing # 可以同时显示多个角色
         sprite: /assets/images/Ahming_sprite.png
@@ -42,7 +42,7 @@ steps:
   - stepId: 203
     type: dialogue
     persona: "Protagonist_Internal"
-    image: /assets/images/kiera_new_card_closeup.png # TODO: 需要主角手機屏幕特寫，顯示Kiera那張帶有神秘符號的新名片，符號清晰可見。
+    image: /assets/images/kiera_new_card_closeup.png
     text: "'唯一的裂痕'…'回聲'是想讓我從這裏查起嗎？這個符號…它到底代表什麼？Kiera…你究竟是誰？" # 主角決定將註意力轉向Kiera的線索。
     nextStep: 204
 
@@ -82,9 +82,9 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    image: /assets/images/archive_interior.png # TODO: 需要資料中心內部全景圖，巨大的書架，空氣中漂浮著灰塵，光線從高窗射入，形成光柱。一個老舊的查詢終端在畫面一角。
+    image: /assets/images/archive_interior.png
     characters:
-      - id: Librarian # TODO: 需要一位年長的圖書管理員立繪，戴著老花鏡，表情有些嚴肅但眼神深邃。
+      - id: Librarian
         sprite: /assets/images/librarian_sprite.png
         position: left
     text: "資料中心內部異常安靜，與外界的喧囂彷彿兩個世界。空氣中是舊紙張和防腐劑混合的味道。一位年長的管理員從高大的書架後走了出來，打量著我這個不速之客。"
@@ -167,7 +167,7 @@ steps:
     persona: "Narrator"
     owner: "Protagonist_Internal"
     text: "帶著KGF這個沉重的名字和'工廠社區'的線索，我離開了資料中心。一種預感讓我先繞回了唐樓。還沒到街角，就聽到涼茶鋪那邊傳來爭吵聲。"
-    image: /assets/images/tea_store.png # TODO: 需要一張涼茶鋪門口的圖片，阿明和外婆面色凝重，幾個穿著供應商制服的人在和他們理論，地上散落著一些藥材。
+    image: /assets/images/tea_store.png
     nextStep: 215_1
 
   - stepId: 215_1
@@ -218,7 +218,7 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    image: /assets/images/kgf_studio_exterior.png # TODO: 需要一個被廢棄的展覽空間或工作室的外部圖，充滿KGF風格的怪誕設計，但已蒙上灰塵，大門緊鎖。
+    image: /assets/images/kgf_studio_exterior.png
     text: "Kiera發來的地點，是一處位於工業區邊緣的廢棄建築，據說也是KGF當年的工作室之一。Kiera獨自一人在這裏等我，穿著便服，沒有了直播時的光鮮，多了一絲迷惘。"
     nextStep: 223_1
 
@@ -226,8 +226,8 @@ steps:
     type: dialogue
     persona: "Kiera"
     characters:
-      - id: Kiera # TODO: 需要Kiera的便服立繪，表情略帶迷惘和好奇。
-        sprite: /assets/images/kiera_casual_sprite.png
+      - id: Kiera
+        sprite: /assets/images/Kiera_sprite.png
         position: left
     text: "這裏…是我祖父KGF留下的地方。我父親（KF）不喜歡這裏，覺得它不切實際。但我偶爾會偷偷跑來。我總覺得，這裏藏著一些…被遺忘的東西。" # Kiera透露符號與KGF的關係，並無意中提及KF，但主角此時不知KF是誰。
     nextStep: 224
