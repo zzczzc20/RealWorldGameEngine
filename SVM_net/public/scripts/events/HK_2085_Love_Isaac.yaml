@@ -660,12 +660,24 @@ steps:
     persona: "Player" # 主角回應，但帶有疏離感，因為失憶
     owner: "AhMing"
     text: "你是…？抱歉，我好像…不太記得了。"
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 13
 
   - stepId: 13
     type: dialogue
     persona: "AhMing" # 阿明楞了一下，然後想起什麼
     text: "啊…對哦，差點忘了。聽說你…出了點事，很多東西都不記得了？我是阿明啊！我們以前是同學，坐你後面的那個！還記得嗎？一點印象都沒有？" # 揭示主角失憶，嘗試喚起回憶
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 15
 
   # - stepId: 14
@@ -680,12 +692,24 @@ steps:
     persona: "Player" # 主角嘗試回應，承認失憶
     owner: "AhMing"
     text: "*阿明…嗯，好像有點模糊的印象…又好像沒有。但我記憶中他好像有個奶奶？奶奶...我為什麼對這個奶奶有印象？*抱歉，我確實…很多事都忘了。"
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 16
 
   - stepId: 16
     type: dialogue
     persona: "AhMing" # 阿明接受現實，語氣可能有點低落，然後轉嚮自己的話題
     text: "唉，沒事沒事，忘了就忘了吧…反正也沒什麼好記的。你看我現在，還不是一樣混日子。倒是你，怎麼會跑來這破地方？這裏快沒什麼人咯。" # 轉換話題，暗示區域衰落
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 17
 
   - stepId: 17
@@ -693,12 +717,24 @@ steps:
     persona: "Player" # 主角含糊其辭，可能順勢問起涼茶鋪
     owner: "AhMing"
     text: "我…只是隨便走走。看到那邊好像有家涼茶鋪還開著？" # 試探性地問起“燈火”
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 18
 
   - stepId: 18
     type: dialogue
     persona: "AhMing" # 阿明提到涼茶鋪，語氣復雜，引出他的現狀和 Kiera
     text: "哦，你說那家啊…那是我外婆的店。唉，也快撐不下去了…現在誰還喝這個啊。要不是…算了不說了。我現在也就靠看看直播打發時間了。餵，你看 Kiera 的直播嗎？超正的！" # 提到涼茶鋪睏境，立刻轉到 Kiera 直播，形成對比
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 19
 
   - stepId: 19
@@ -712,12 +748,24 @@ steps:
     persona: "Player" # 主角對 Kiera 沒印象
     owner: "AhMing"
     text: "Kiera？沒聽過。"
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 20
 
   - stepId: 20
     type: dialogue
     persona: "AhMing" # 阿明興奮地介紹 Kiera，拿出設備展示
     text: "不是吧？Kiera 你都不知道？現在最火的美食探店主播！她超可愛的，而且推薦的東西都超好吃！你看你看，這是她昨天直播的片段…" # 拿出設備，准備播放 Kiera 的直播片段，體現沈迷
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     # (將來可以接一個播放視頻/顯示圖片的步驟)
     nextStep: 21
 
@@ -732,6 +780,12 @@ steps:
     type: dialogue
     persona: "AhMing" # 阿明沒註意到主角的異樣，繼續沈浸在對 Kiera 的贊美中
     text: "怎麼樣？是不是很棒！感覺看她直播，心情都會好一點。不像現實這麼…唉。" # 感嘆現實，反襯 Kiera 的作用
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 23
 
   - stepId: 23
@@ -739,12 +793,24 @@ steps:
     persona: "Player" # 主角岔開話題，可能問及阿明家人，引出父親失蹤線索
     owner: "AhMing"
     text: "嗯…挺特別的。對了，阿明，我好像有點印象，你家裏…現在就你和你奶奶嗎？" # 嘗試了解更多背景
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 24
 
   - stepId: 24
     type: dialogue
     persona: "AhMing" # 阿明提到家人，語氣黯淡，順帶問及主角父親
     text: "不是奶奶是外婆啦，我奶奶早沒了…。我媽…也早就不在了。我爸…（停頓，眼神閃爍）…不知道跑哪去了，好久沒消息了。跟你爸一樣吧？聽說你爸當年也是…突然就沒影了？" # 提到自己父親失蹤，併反問主角父親的情況，埋下伏筆
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 25
 
   - stepId: 25
@@ -759,12 +825,24 @@ steps:
     persona: "Player"
     owner: "AhMing" # 這條消息顯示在阿明的聊天界面
     text: "你父親…也失蹤了？我爸也是？我…一點都不記得了。你知道大概是什麼時候的事嗎？他們…認識嗎？" # 嘗試獲取更多關於父親失蹤的信息，併試探關聯
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 27
 
   - stepId: 27
     type: dialogue
     persona: "AhMing"
     text: "嗯…大概是…七八年前吧？那陣子挺亂的。他們認不認識…我也不清楚，我爸那時候神神秘秘的，好像在搞什麼大項目…後來就…唉。你爸好像也是差不多時候沒的吧？大人不說，我們小孩哪知道那麼多。" # 給出模糊時間點（接近2077），暗示事件關聯，但細節不明
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 28
 
   - stepId: 28
@@ -772,6 +850,12 @@ steps:
     persona: "Player"
     owner: "AhMing"
     text: "七八年前…我完全沒概念。就像腦子裏那塊地方被人挖掉了一樣…連我爸長什麼樣都想不起來。" # 錶達失憶的痛苦和挫敗感
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     audio: /assets/audio/father.mp3 # 添加音頻，增強情感共鳴
     nextStep: 29
 
@@ -779,6 +863,12 @@ steps:
     type: dialogue
     persona: "AhMing"
     text: "哎呀，想不起來就算了嘛！強哥。過去的事那麼麻煩，想它幹嘛？人要嚮前看嘛！你看我，現在看看 Kiera 直播，找點樂子，不也挺好？別鉆牛角尖了。" # 試圖用自己的逃避主義哲學安慰主角，再次提到 Kiera
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: left
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 30
 
   - stepId: 30
@@ -786,12 +876,24 @@ steps:
     persona: "Player"
     owner: "AhMing"
     text: "也許吧…（頓了頓，看嚮涼茶鋪方嚮）你剛才說，你外婆的店快撐不下去了？怎麼回事？我看…雖然舊了點，但還挺幹凈的。" # 轉嚮涼茶鋪話題，關心其睏境，連接 Echo 指令
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite2.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 31
 
   - stepId: 31
     type: dialogue
     persona: "AhMing"
     text: "幹凈有屁用啊！現在這鬼地方，鳥不拉屎的！以前這裏多熱鬧啊…自從那幫搞開發的盯上這塊地，又是修路改道，又是旁邊搞拆遷，搞得烏煙瘴氣，老街坊都搬走了，遊客也不來了，哪還有生意？成本倒越來越高…我外婆就是死腦筋，非要守著這破店。" # 解釋涼茶鋪睏境，歸咎於“搞開發的”，暗示 KF 的間接手段
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite2.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 32
 
   - stepId: 32
@@ -799,6 +901,12 @@ steps:
     persona: "Player"
     owner: "AhMing"
     text: "搞開發的…他們就不能好好商量嗎？這也太…（欲言又止）你外婆一個人撐著，很辛苦吧？需要幫忙嗎？雖然我…可能也幫不上什麼大忙。" # 錶達同情，流露出幫助的意願（普遍性萌芽）
+    image: /assets/images/tea_store.png
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite2.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 6001
 
   - stepId: 6001
@@ -869,6 +977,12 @@ steps:
     type: dialogue
     persona: "Kiera"
     text: "*Kiera 快速掃了一眼屏幕，笑容更甜* 謝謝寶寶！mua~！這家店在‘天樞’那邊新開的商場頂樓哦，風景超贊的！等下帶你們看夜景！*她小心翼翼地啜了一口飲料，眼睛誇張地亮了一下* Mmmm！好特別！"
+    image: /assets/images/Kiera_store.png
+    characters:
+      - id: Kiera # 可以同时显示多个角色
+        sprite: /assets/images/Kiera_sprite.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     audio: /assets/audio/kiera2.mp3
     nextStep: 45
 
@@ -876,6 +990,12 @@ steps:
     type: dialogue
     persona: "Kiera"
     text: "*她湊近鏡頭，壓低聲音，像分享秘密一樣* 它的底層是那種很清爽的荔枝梳打，中間是蝶豆花染出的藍色冰沙，上面…上面居然是鹹芝士奶蓋撒了跳跳糖！*她用小勺舀起一點奶蓋* 你們聽—— *把勺子靠近收音設備，可以聽到輕微的劈啪聲* 是不是超好玩！口感爆炸！" # 極度聚焦感官細節
+    image: /assets/images/Kiera_store.png
+    characters:
+      - id: Kiera # 可以同时显示多个角色
+        sprite: /assets/images/Kiera_sprite.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     nextStep: 46
 
   - stepId: 46
