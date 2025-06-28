@@ -105,6 +105,45 @@ const tasks = [
   // },
 ];
 
+// --- 逻辑拼图任务: AKHE ---
+tasks.push({
+  taskId: "AKHE_DESIGNER_PUZZLE",
+  title: "解构：神秘设计师",
+  description: "调查Kiera名片背后的神秘符号，追寻一位身份不明的设计师'AKHE'的线索。该任务需要整理破碎的数据库记录，拼凑出设计师的真实身份。",
+  reward: 500,
+  difficulty: "Hard",
+  estimatedTime: "30 mins",
+  relatedSvmId: null,
+  type: "LOGIC_PUZZLE",
+  initiallyVisible: false,
+  puzzleData: {
+    documents: [
+      { id: 1, content: "设计流派：新极简主义。强调功能性，去除所有不必要的装饰。代表作：城市交通枢纽'Nexus'。与Kiera的符号无关。", keywords: [] },
+      { id: 2, content: "核心概念：对主流秩序的冷峻戏仿。挑战观众的预设观念，通过荒诞的并置引发思考。相关项目：'都市迷宫'艺术装置。", keywords: ["对主流秩序的冷峻戏仿", "AK"] },
+      { id: 3, content: "设计哲学：有机建筑。模仿自然形态，追求建筑与环境的和谐共生。与Kiera的符号无关。", keywords: [] },
+      { id: 4, content: "主义：解构主义。通过破碎和重组，暴露事物内在的矛盾。与Kiera的符号无关。", keywords: [] },
+      { id: 5, content: "美学思想：反讽美学。故意使用廉价、日常的材料创作，颠覆传统奢侈品概念，营造一种疏离感。", keywords: ["反讽美学", "疏离", "AK"] },
+      { id: 6, content: "空间理论：异质空间。创造出现实中不存在，仅存于精神层面的场所，作为对现实世界的批判。", keywords: ["异质空间", "H", "E"] },
+      { id: 7, content: "设计宣言：'我的设计，是献给这个荒诞世界最真诚的玩笑。'", keywords: ["H", "E"] }
+    ],
+    clueboardKeywords: ["反讽", "疏离", "AK", "异质空间", "对主流秩序的冷峻戏仿", "H", "E"],
+    finalSolution: "AKHE",
+    finalDocument: {
+      title: "设计师档案：__H_",
+      content: "我的设计，是献给这个荒‘诞世界最真诚的玩笑。’"
+    },
+    hints: [
+      "留意那些描述中包含矛盾或者颠覆性概念的文档。",
+      "将文档拖到线索板上，看看哪些关键字会高亮。",
+      "Kiera的名片是找到设计师的关键，上面的符号 'AK' 很重要。",
+      "档案标题中的'__H_'和'__E__'明显是残缺的字母。",
+      "尝试将线索结合起来，组成一个完整的名字。"
+    ],
+  },
+  successMessage: "逻辑拼图解开。设计师'AKHE'的身份已确认。",
+  failureMessage: "组合错误，身份验证失败。"
+});
+
 // Function to get task details by ID
 export function getTaskById(taskId) {
   console.log(`[getTaskById] Searching for taskId: ${taskId} (Type: ${typeof taskId})`);

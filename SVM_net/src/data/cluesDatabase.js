@@ -98,6 +98,15 @@ export const cluesDB = {
     description: '二十年前的时间介绍',
     source: 'svm_interaction_B02',
   },
+  Kiera_new_card: {
+    id: 'Kiera_new_card',
+    puzzleId: 'newsPuzzle',
+    title: '神秘的Kiera卡片',
+    type: 'image_url',
+    content: '/assets/images/kiera_new_card_closeup.png',
+    description: '一张带有神秘符号的Kiera卡片',
+    source: 'svm_interaction_B02',
+  },
   // Add more predefined clues here as needed for different puzzles
 };
 

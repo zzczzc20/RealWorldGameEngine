@@ -22,6 +22,7 @@ import RiftManager from './components/RiftManager';
 import RiftTunerDemo from './components/RiftTunerDemo';
 import RiftTunerGame from './components/RiftTunerGame';
 import VisualNovelView from './components/VisualNovelView';
+import LogicPuzzleView from './components/LogicPuzzleView';
 
 function AppContent() {
   const [apiProvider, setApiProvider] = useState(null); // Added
@@ -141,7 +142,7 @@ function AppContent() {
   const handleAcceptTask = (task) => setActiveTask(task);
   const handleExecuteTask = (taskId) => {
       const taskDetails = getTaskById(taskId);
-      if (taskDetails && (taskDetails.type === 'CODE_ENTRY' || taskDetails.type === 'RIFT_TUNER')) {
+      if (taskDetails && (taskDetails.type === 'CODE_ENTRY' || taskDetails.type === 'RIFT_TUNER' || taskDetails.type === 'LOGIC_PUZZLE')) {
           setExecutingTaskId(taskId);
       }
   };
@@ -304,6 +305,21 @@ function AppContent() {
                             onFailure={(result) => {
                                 console.log('Rift Tuner Failure:', result);
                                 handleCodeEntryClose();
+                            }}
+                        />
+                    );
+                } else if (taskDetails && taskDetails.type === 'LOGIC_PUZZLE') {
+                    codeEntryPanel = (
+                        <LogicPuzzleView
+                            task={taskDetails}
+                            onSolve={(taskId) => {
+                                console.log('Puzzle Solved:', taskId);
+                                handleTaskComplete(taskDetails);
+                                handleCodeEntryClose();
+                            }}
+                            onFail={(taskId) => {
+                                console.log('Puzzle Failed:', taskId);
+                                // Maybe add some UI feedback for failure
                             }}
                         />
                     );

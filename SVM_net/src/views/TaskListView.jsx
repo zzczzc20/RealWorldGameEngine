@@ -73,13 +73,21 @@ function TaskListView({ onAcceptTask, onExecuteTask, activeTask }) {
                 buttonText = 'Active';
                 buttonClass = '!bg-green-600 !text-white cursor-default';
                 // If it's an active CODE_ENTRY or RIFT_TUNER task, show Execute button instead
-                if (task.type === 'CODE_ENTRY' || task.type === 'RIFT_TUNER') {
-                    buttonText = task.type === 'RIFT_TUNER' ? '调谐' : 'Execute';
+                if (task.type === 'CODE_ENTRY' || task.type === 'RIFT_TUNER' || task.type === 'LOGIC_PUZZLE') {
+                    buttonText = '开始';
+                    if (task.type === 'RIFT_TUNER') buttonText = '调谐';
+                    if (task.type === 'CODE_ENTRY') buttonText = 'Execute';
+                    
                     buttonDisabled = false; // Allow execution
                     buttonAction = () => onExecuteTask(task.taskId); // Call the new handler
-                    buttonClass = task.type === 'RIFT_TUNER' ?
-                        '!bg-purple-500 hover:!bg-purple-400' :
-                        '!bg-yellow-500 hover:!bg-yellow-400'; // Style for execute
+                    
+                    if (task.type === 'RIFT_TUNER') {
+                        buttonClass = '!bg-purple-500 hover:!bg-purple-400';
+                    } else if (task.type === 'LOGIC_PUZZLE') {
+                        buttonClass = '!bg-green-500 hover:!bg-green-400';
+                    } else {
+                        buttonClass = '!bg-yellow-500 hover:!bg-yellow-400';
+                    }
                 }
             } else if (currentLocalStatus === 'accepting') {
                 buttonText = 'Accepting...';

@@ -287,7 +287,7 @@ function getScriptIdByTrigger(triggerEvent) {
  // This function would ideally check a configuration or metadata file to map trigger events to script IDs
  // For now, we'll use a simple mapping based on known scripts
  const triggerToScriptMap = {
-   'game_start': 'HK_2085_Love_Isaac' // Reverted filename
+   'game_start': 'HK_2085_Obstacle' // Reverted filename
  };
  console.log(`[EventService] Mapped trigger '${triggerEvent}' to scriptId: '${triggerToScriptMap[triggerEvent] || null}'`);
  return triggerToScriptMap[triggerEvent] || null;

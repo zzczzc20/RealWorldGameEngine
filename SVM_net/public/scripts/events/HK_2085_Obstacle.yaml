@@ -2,9 +2,16 @@ scriptId: HK_2085_Obstacle
 title: "香港2085：障礙"
 trigger: # 假設在第一章結束後自動觸發
   event: 'game_start'
-entry: 200
+entry: 200_X
 
 steps:
+  - stepId: 200_X
+    type: updateWorldState
+    target: persona
+    id: "AhMing"
+    property: requiresChatWindow
+    value: true
+    nextStep: 200
   - stepId: 200 # 章節開始，承接第一章結尾
     type: dialogue
     persona: "Narrator"
@@ -35,6 +42,13 @@ steps:
   - stepId: 202
     type: dialogue
     persona: "Player"
+    image: /assets/images/warehouse_aftermath.png
+    audio: /assets/audio/city_rumble_low.mp3
+    characters:
+      - id: AhMing # 可以同时显示多个角色
+        sprite: /assets/images/Ahming_sprite.png
+        position: center
+        effect: { type: 'slideInLeft', duration: 1.0 }
     owner: "AhMing"
     text: "（看著失魂落魄的阿明，你不知如何安慰。'不要滋養無根的野草'…'回聲'的話語讓你感到一陣寒意。你拿出Kiera給的那張帶有奇特符號的名片。）阿明，先別想了。我們得先離開這裏。我…我還有點事要做。"
     nextStep: 203
@@ -81,7 +95,7 @@ steps:
   - stepId: 208 # 前往資料中心
     type: dialogue
     persona: "Narrator"
-    owner: "Protagonist_Internal"
+    owner: "Librarian"
     image: /assets/images/archive_interior.png
     characters:
       - id: Librarian
@@ -93,12 +107,22 @@ steps:
   - stepId: 208_1
     type: dialogue
     persona: "Librarian"
+    image: /assets/images/archive_interior.png
+    characters:
+      - id: Librarian
+        sprite: /assets/images/librarian_sprite.png
+        position: left
     text: "年輕人，這裏可不是給網紅打卡的地方。你要找什麼？我們這裏的資料，大部分在網絡上都找不到複製品。"
     nextStep: 208_2
 
   - stepId: 208_2
     type: dialogue
     persona: "Player"
+    image: /assets/images/archive_interior.png
+    characters:
+      - id: Librarian
+        sprite: /assets/images/librarian_sprite.png
+        position: left
     owner: "Librarian"
     text: "（我展示了終端上的符號）您好，我想查找關於這個設計符號的資料。它可能和一位舊時代的設計師有關。"
     nextStep: 208_3
@@ -106,12 +130,17 @@ steps:
   - stepId: 208_3
     type: dialogue
     persona: "Librarian"
+    image: /assets/images/archive_interior.png
+    characters:
+      - id: Librarian
+        sprite: /assets/images/librarian_sprite.png
+        position: left
     text: "（管理員扶了扶眼鏡，湊近看了看）這個符號…有點印象。很久沒人來問過了。它屬於一個…充滿爭議的人。跟我來吧，用那個舊終端查查看，新系統可能已經把它過濾掉了。"
     nextStep: 209
 
   - stepId: 209 # 觸發謎題
-    type: ACTIVATE_PUZZLE
-    puzzleId: "symbolArchivePuzzle" # 激活符號檔案謎題
+    type: UNLOCK_TASK
+    taskId: "AKHE_DESIGNER_PUZZLE" # 激活符號檔案謎題
     nextStep: 210
 
   - stepId: 210
@@ -129,8 +158,8 @@ steps:
     nextStep: 211
 
   - stepId: 211
-    type: WAIT_FOR_PUZZLE_SOLVED
-    puzzleId: "symbolArchivePuzzle"
+    type: WAIT_FOR_TASK_COMPLETED
+    taskId: "AKHE_DESIGNER_PUZZLE"
     nextStep: 212
     stepIdOnWait: 213
 
