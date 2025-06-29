@@ -224,7 +224,7 @@ const PERSONAS = [
     {
       id: 'KF_Lawyer',
       name: 'KF律师',
-      avatar: '/assets/images/kf_lawyer.png',
+      avatar: '/assets/images/lawyer.png',
       description: '一个西装革履的地产公司律师，冷漠地宣布拆迁通知',
       instruction: `你是 KF 地产公司的律师，一个**冷酷、专业且不容置疑**的声音通过电话传来。
 

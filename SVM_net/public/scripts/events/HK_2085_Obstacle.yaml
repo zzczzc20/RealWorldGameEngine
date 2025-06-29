@@ -453,7 +453,7 @@ steps:
     type: dialogue
     persona: "AhMing"
     text: "強哥！快來涼茶鋪！KF地產的人來了！他們帶著正式文件，說我們消防設施不合格，要我們立刻停業！我外婆…我外婆被他們氣得暈過去了！"
-    image: /assets/images/teashop_trouble_2.png # TODO: 需要手機通訊界面，阿明的頭像劇烈晃動，背景是混亂的涼茶鋪，可以看到穿西裝的人和倒在地上的婆婆的衣角。
+    image: /assets/images/tea_store.png # TODO: 需要手機通訊界面，阿明的頭像劇烈晃動，背景是混亂的涼茶鋪，可以看到穿西裝的人和倒在地上的婆婆的衣角。
     nextStep: 238_1
 
   - stepId: 238_1
