@@ -169,6 +169,50 @@ export const puzzlesDB = {
       content: "你在转盘上的照片处发现了数字8的痕迹，这个数字似乎暗示着某个重要的信息。"
     }
   },
+  KM_archive_puzzle: {
+    puzzleId: 'KM_archive_puzzle',
+    title: '加密档案',
+    description: '一个需要密码的加密档案。KGF留下的话似乎暗示着什么...',
+    status: 'locked',
+    solutionType: 'code',
+    solution: 'PURIFICATION',
+    initialVariables: { 
+      attemptsMade: 0, 
+      hintUnlocked: false,
+      hintShown: false
+    },
+    relatedClueIds: ['clue_KGF_message'],
+    onSolveActions: [
+      { type: 'dialogue', personaId: 'system', text: '档案解密成功。', nextStep: null },
+      { type: 'UNLOCK_CLUE', clueId: 'KM_archive_contents', nextStep: null }
+    ],
+    solvedDisplay: {
+      type: 'text',
+      content: "你成功解开了加密档案，里面的内容令人不安..."
+    }
+  },
+  KGF_Blueprint_Puzzle: {
+    puzzleId: 'KGF_Blueprint_Puzzle',
+    title: 'KGF的笔记谜题',
+    description: '笔记1："庇护所即是牢籠。" 笔记2："出口即是陷阱。" 笔记3："最穩固的支撐，來自於虛空。"',
+    status: 'locked',
+    solutionType: 'code',
+    solution: 'ATEN',
+    initialVariables: { 
+      attemptsMade: 0, 
+      hintUnlocked: false,
+      hintShown: false
+    },
+    relatedClueIds: ['clue_KGF_notes'],
+    onSolveActions: [
+      { type: 'dialogue', personaId: 'system', text: '笔记谜题解开了。', nextStep: null },
+      { type: 'UNLOCK_CLUE', clueId: 'KGF_blueprint_revealed', nextStep: null }
+    ],
+    solvedDisplay: {
+      type: 'text',
+      content: "你解开了KGF留下的笔记谜题，获得了重要的线索..."
+    }
+  },
   mingTakCodeEntry: {
     puzzleId: 'mingTakCodeEntry',
     title: '明德商场入口密码',

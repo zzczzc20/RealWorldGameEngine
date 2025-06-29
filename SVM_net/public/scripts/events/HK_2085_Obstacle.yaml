@@ -166,13 +166,13 @@ steps:
   - stepId: 212 # 謎題解決
     type: dialogue
     persona: "Protagonist_Internal"
-    text: "KGF…就是這個名字。資料顯示他是一位活躍於21世紀中葉的建築設計師，以極度超前和怪誕的風格聞名，但在主流視野中被刻意遺忘。這個符號，是他的個人簽名。"
+    text: "AKHE…就是這個名字。資料顯示他是一位活躍於21世紀中葉的建築設計師，以極度超前和怪誕的風格聞名，但在主流視野中被刻意遺忘。這個符號，是他的個人簽名。"
     nextStep: 212_1
 
   - stepId: 212_1
     type: dialogue
     persona: "Librarian"
-    text: "（看到我解開了謎題，管理員點了點頭）想起來了，KGF。一個天才，也是一個悲劇。他的理念太危險，不容於他的兒子——現在的KF集團掌門人。他最後的作品，一個叫'工廠社區'的實驗項目，就在觀塘那邊，現在應該已經是廢墟了吧。說起來，他家裏的悲劇也不少，我記得他有個兒媳，也是個很有才華的設計師，後來…唉，也是一言難盡。" # 暗示KM/Sera的存在和悲劇，並點出涼茶鋪所在地的起源。
+    text: "（看到我解開了謎題，管理員點了點頭）想起來了，AKHE。一個天才，也是一個悲劇。他的理念太危險，不容於他的兒子——現在的KF集團掌門人。他最後的作品，一個叫'工廠社區'的實驗項目，就在觀塘那邊，現在應該已經是廢墟了吧。說起來，他家裏的悲劇也不少，我記得他有個兒媳，也是個很有才華的設計師，後來…唉，也是一言難盡。" # 暗示KM/Sera的存在和悲劇，並點出涼茶鋪所在地的起源。
     nextStep: 214
 
   - stepId: 213 # 等待謎題解決時的循環提示
@@ -195,7 +195,7 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    text: "帶著KGF這個沉重的名字和'工廠社區'的線索，我離開了資料中心。一種預感讓我先繞回了唐樓。還沒到街角，就聽到涼茶鋪那邊傳來爭吵聲。"
+    text: "帶著AKHE這個沉重的名字和'工廠社區'的線索，我離開了資料中心。一種預感讓我先繞回了唐樓。還沒到街角，就聽到涼茶鋪那邊傳來爭吵聲。"
     image: /assets/images/tea_store.png
     nextStep: 215_1
 
@@ -227,7 +227,7 @@ steps:
 
   - stepId: 219
     type: aiDialogue
-    prompt: "我看著病倒的婆婆和手足無措的阿明，又想到'回聲'那毫無溫度的指令，內心劇烈地掙扎。幫助他們，似乎是天經地義的選擇，但這會不會只是徒勞？就像在沙地上潑水一樣？而追尋KGF的線索，又感覺像是在背棄眼前活生生的苦難。我該怎麼辦？"
+    prompt: "我看著病倒的婆婆和手足無措的阿明，又想到'回聲'那毫無溫度的指令，內心劇烈地掙扎。幫助他們，似乎是天經地義的選擇，但這會不會只是徒勞？就像在沙地上潑水一樣？而追尋AKHE的線索，又感覺像是在背棄眼前活生生的苦難。我該怎麼辦？"
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 220
@@ -250,7 +250,7 @@ steps:
     type: dialogue
     persona: "Player"
     owner: "Kiera" # 使用新的聯繫方式
-    text: "Kiera小姐，我是上次在涼茶鋪為你調制‘昨日回響’的人。我找到了符號的含義，它指向KGF。"
+    text: "Kiera小姐，我是上次在涼茶鋪為你調制‘昨日回響’的人。我找到了符號的含義，它指向AKHE。"
     nextStep: 222
 
   - stepId: 222
@@ -264,36 +264,61 @@ steps:
     persona: "Narrator"
     owner: "Protagonist_Internal"
     image: /assets/images/kgf_studio_exterior.png
-    text: "Kiera發來的地點，是一處位於工業區邊緣的廢棄建築，據說也是KGF當年的工作室之一。Kiera獨自一人在這裏等我，穿著便服，沒有了直播時的光鮮，多了一絲迷惘。"
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_casual.png
+        position: center
+    text: "Kiera發來的地點，是一處位於工業區邊緣的廢棄建築，據說也是AKHE當年的工作室之一。Kiera獨自一人在這裏等我，穿著便服，沒有了直播時的光鮮，但好自然。"
     nextStep: 223_1
 
   - stepId: 223_1
     type: dialogue
     persona: "Kiera"
+    image: /assets/images/kgf_studio_exterior.png
     characters:
       - id: Kiera
-        sprite: /assets/images/Kiera_sprite.png
-        position: left
-    text: "這裏…是我祖父KGF留下的地方。我父親（KF）不喜歡這裏，覺得它不切實際。但我偶爾會偷偷跑來。我總覺得，這裏藏著一些…被遺忘的東西。" # Kiera透露符號與KGF的關係，並無意中提及KF，但主角此時不知KF是誰。
+        sprite: /assets/images/Kiera_casual.png
+        position: center
+    text: "這裏…是我祖父AKHE留下的地方。我父親（KF）不喜歡這裏，覺得它不切實際。但我偶爾會偷偷跑來。我總覺得，這裏藏著一些…被遺忘的東西。" # Kiera透露符號與KGF的關係，並無意中提及KF，但主角此時不知KF是誰。
     nextStep: 224
 
   - stepId: 224
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    image: /assets/images/kgf_studio_interior.png # TODO: 需要工作室內部圖，散落著設計圖紙、模型，牆上有一個巨大的、複雜的建築藍圖。
+    image: /assets/images/kgf_studio_interior.png 
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_casual.png
+        position: center
     text: "工作室內部比外面看起來更大，像一個小型的迷宮。牆上掛著一些怪異的設計圖，其中一張名為'舟'的島嶼設計圖吸引了我的注意。Kiera似乎沒注意到，她徑直走向一個佈滿灰塵的角落。" # 暗示Sera的“舟”計劃。
     nextStep: 225
 
   - stepId: 225
     type: dialogue
     persona: "Kiera"
+    image: /assets/images/kgf_studio_interior.png 
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_casual.png
+        position: center
+      - id: KM
+        sprite: /assets/images/KM_sprite.png
+        position: right
     text: "（她指著牆角一個沒有佩戴任何首飾、表情疏離的女性人體模型）我聽說，我母親…也有著類似的審美，非常簡潔，甚至可以說是嚴苛。跟我完全不一樣，對吧？" # 暗示KM/Sera的風格，製造對比，加深詭計。
     nextStep: 226
 
   - stepId: 226
     type: dialogue
     persona: "Kiera"
+    image: /assets/images/kgf_studio_interior.png 
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_casual.png
+        position: center
+      - id: KM
+        sprite: /assets/images/KM_sprite.png
+        position: right
     text: "我父親說我祖父最後是沉迷於自己的幻想裏，才被時代淘汰的。但我有時候會做一些奇怪的夢，夢到火焰、舞台、失控的人群…感覺和他的設計有些關係。就像我…我以前也嘗試過一些更大膽、更實驗性的直播，但效果不好，太壓抑了，就放棄了。（她輕描淡寫地說）可能我們家的人，骨子裏都有點瘋狂吧。" # 核心詭計：種下“KM=Kiera早期”的誤導。
     nextStep: 226_1
 
@@ -311,6 +336,14 @@ steps:
   - stepId: 227_1
     type: dialogue
     persona: "Kiera"
+    image: /assets/images/kgf_studio_interior.png 
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_casual.png
+        position: center
+      - id: KM
+        sprite: /assets/images/KM_sprite.png
+        position: right
     text: "這是祖父留下的互動藍圖，他說'真正的結構，誕生於矛盾的統一'。我從沒搞懂過。"
     # 謎題描述：KGF_Blueprint_Puzzle
     # 類型：空間邏輯與哲學理念結合。
@@ -403,7 +436,7 @@ steps:
 
   - stepId: 236
     type: aiDialogue
-    prompt: "我震驚地聽著這些錄音。這聲音…無疑是Kiera的，但語氣和內容卻像完全變了一個人。充滿了偏執的激情和危險的思想。'管道'？'方舟'？這都是什麼？'父親的壓迫'？是指KF嗎？'祖父的理念'？她想繼承KGF的什麼？'火焰'…'淨化'…難道她正在策劃某種可怕的恐怖襲擊或大型破壞活動？她光鮮的網紅外表下，竟然隱藏著這樣黑暗的一面？"
+    prompt: "我震驚地聽著這些錄音。這聲音…無疑是Kiera的，但語氣和內容卻像完全變了一個人。充滿了偏執的激情和危險的思想。'管道'？'方舟'？這都是什麼？'父親的壓迫'？是指KF嗎？'祖父的理念'？她想繼承AKHE的什麼？'火焰'…'淨化'…難道她正在策劃某種可怕的恐怖襲擊或大型破壞活動？她光鮮的網紅外表下，竟然隱藏著這樣黑暗的一面？"
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 236_1
@@ -465,7 +498,7 @@ steps:
   - stepId: 300
     type: dialogue
     persona: "Narrator"
-    text: "（選擇幫助涼茶鋪）你掛斷了與'回聲'的連接，轉身衝出KGF的工作室，向著那間在風雨中飄搖的涼茶鋪狂奔而去。你選擇了眼前的責任，但那關於過去的巨大謎團，以及'回聲'那不祥的沉默，讓你感到未來更加兇險莫測。"
+    text: "（選擇幫助涼茶鋪）你掛斷了與'回聲'的連接，轉身衝出AKHE的工作室，向著那間在風雨中飄搖的涼茶鋪狂奔而去。你選擇了眼前的責任，但那關於過去的巨大謎團，以及'回聲'那不祥的沉默，讓你感到未來更加兇險莫測。"
     nextStep: -1 # 章節結束，進入第三章
 
   - stepId: 301
