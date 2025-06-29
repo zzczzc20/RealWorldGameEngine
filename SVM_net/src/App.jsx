@@ -22,7 +22,7 @@ import RiftManager from './components/RiftManager';
 import RiftTunerDemo from './components/RiftTunerDemo';
 import RiftTunerGame from './components/RiftTunerGame';
 import VisualNovelView from './components/VisualNovelView';
-import LogicPuzzleView from './components/LogicPuzzleView';
+import LogicPuzzleGame from './components/LogicPuzzleGame';
 
 function AppContent() {
   const [apiProvider, setApiProvider] = useState(null); // Added
@@ -310,16 +310,19 @@ function AppContent() {
                     );
                 } else if (taskDetails && taskDetails.type === 'LOGIC_PUZZLE') {
                     codeEntryPanel = (
-                        <LogicPuzzleView
-                            task={taskDetails}
-                            onSolve={(taskId) => {
-                                console.log('Puzzle Solved:', taskId);
+                        <LogicPuzzleGame
+                            isVisible={true}
+                            taskData={taskDetails}
+                            onClose={handleCodeEntryClose}
+                            onSuccess={(result) => {
+                                console.log('Logic Puzzle Solved:', result);
                                 handleTaskComplete(taskDetails);
                                 handleCodeEntryClose();
                             }}
-                            onFail={(taskId) => {
-                                console.log('Puzzle Failed:', taskId);
-                                // Maybe add some UI feedback for failure
+                            onFailure={(result) => {
+                                console.log('Logic Puzzle Failed:', result);
+                                // For now, failure allows retry within the component, so we might not need a global handler here.
+                                // If we wanted failure to close the window, we would call handleCodeEntryClose() here.
                             }}
                         />
                     );
