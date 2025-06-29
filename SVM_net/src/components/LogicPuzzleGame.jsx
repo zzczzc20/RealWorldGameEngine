@@ -1,5 +1,6 @@
 // src/components/LogicPuzzleGame.jsx
 import React, { useState } from 'react';
+import { publish } from '../services/EventService';
 import CyberCard from './ui/CyberCard';
 import CyberButton from './ui/CyberButton';
 import LogicPuzzleView from './LogicPuzzleView'; // The core game logic will be in here
@@ -9,6 +10,9 @@ function LogicPuzzleGame({ isVisible, onClose, taskData, onSuccess, onFailure })
 
   const handleSolve = () => {
     setGameState('completed');
+    // The onSuccess handler is now the single source of truth for completing the task.
+    // It will call completeTask in WorldStateContext, which publishes the 'task_completed' event.
+    // This avoids publishing the event twice.
     if (onSuccess) {
       onSuccess({ taskId: taskData.taskId, status: 'success' });
     }

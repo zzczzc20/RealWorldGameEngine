@@ -315,8 +315,11 @@ function AppContent() {
                             taskData={taskDetails}
                             onClose={handleCodeEntryClose}
                             onSuccess={(result) => {
-                                console.log('Logic Puzzle Solved:', result);
-                                handleTaskComplete(taskDetails);
+                                console.log('[App.jsx] Logic Puzzle Solved:', result);
+                                // This is the single source of truth for completing the task.
+                                // It will publish the 'task_completed' event that the script parser listens for.
+                                console.log(`[App.jsx] Calling worldStateContext.completeTask for taskId: '${taskDetails.taskId}'`);
+                                worldStateContext.completeTask(taskDetails.taskId, result);
                                 handleCodeEntryClose();
                             }}
                             onFailure={(result) => {

@@ -133,29 +133,35 @@ const LogicPuzzleView = ({ task, onSolve, onFail }) => {
     const currentStage = puzzleData.stages[currentStageIndex];
     if (!currentStage) return;
 
+    const trimmedClueId = clueId.trim();
+
     console.log(`[Drop] --- Drop Event ---`);
     console.log(`[Drop] Stage Index: ${currentStageIndex}`);
-    console.log(`[Drop] Dropped Clue ID: '${clueId}'`);
-    console.log(`[Drop] Key Clues for this stage:`, currentStage.keyClueIds);
+    console.log(`[Drop] Dropped Clue ID: '${trimmedClueId}'`);
     
-    if (currentStage.keyClueIds.includes(clueId)) {
-      console.log(`[Drop] Correct key dropped.`);
+    // Trim keys from the stage definition for a robust comparison
+    const keyClues = currentStage.keyClueIds.map(k => k.trim());
+
+    if (keyClues.includes(trimmedClueId)) {
+      console.log(`[Drop] Correct key dropped: '${trimmedClueId}'`);
       setAvailableClueIds(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(clueId);
-          return newSet;
+        const newSet = new Set(prev);
+        // The original clueId (potentially with whitespace) is what we must delete from the available set.
+        newSet.delete(clueId);
+        return newSet;
       });
 
+      // Still use original clueId to look up revelations, as object keys in data might have whitespace.
       const newRevelations = currentStage.revelations[clueId] || [];
       const newClueObjects = newRevelations.map(id => ({
-          ...puzzleData.clues[id],
-          keyOrigin: clueId,
+        ...puzzleData.clues[id],
+        keyOrigin: clueId, // Keep original keyOrigin for consistency
       }));
       setRevealedClueObjects(prev => [...prev, ...newClueObjects]);
 
-    } else if (!incorrectlyDroppedIds.has(clueId)) {
-      console.log(`[Drop] Incorrect key dropped.`);
-      setIncorrectlyDroppedIds(prev => new Set(prev).add(clueId));
+    } else if (!incorrectlyDroppedIds.has(trimmedClueId)) {
+      console.log(`[Drop] Incorrect key dropped: '${trimmedClueId}'`);
+      setIncorrectlyDroppedIds(prev => new Set(prev).add(trimmedClueId));
       
       setLives(prevLives => {
         const newLives = prevLives - 1;
@@ -165,7 +171,7 @@ const LogicPuzzleView = ({ task, onSolve, onFail }) => {
         return newLives;
       });
     } else {
-      console.log(`[Drop] Already-penalized incorrect clue dropped. No action.`);
+      console.log(`[Drop] Already-penalized incorrect clue dropped: '${trimmedClueId}'`);
     }
   }, [currentStageIndex, cooldown, incorrectlyDroppedIds, puzzleData, lives]);
   

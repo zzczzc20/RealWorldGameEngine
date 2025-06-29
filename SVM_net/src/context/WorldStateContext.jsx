@@ -132,8 +132,8 @@ export function WorldStateProvider({ children }) {
           const chatHistoriesState = parsed.chatHistories || defaultChatHistoriesState;
           const discoveredCluesState = parsed.discoveredClues || defaultDiscoveredCluesState;
           const currentPuzzleStateData = parsed.currentPuzzleState || defaultCurrentPuzzleState;
-          const unlockedTasksState = parsed.unlockedTasks || defaultUnlockedTasks;
-          const completedTasksState = parsed.completedTasks || defaultCompletedTasks;
+          const unlockedTasksState = Array.isArray(parsed.unlockedTasks) ? parsed.unlockedTasks : defaultUnlockedTasks;
+          const completedTasksState = Array.isArray(parsed.completedTasks) ? parsed.completedTasks : defaultCompletedTasks;
           
           return {
               svms: mergedSvms, // Use the merged list
@@ -402,10 +402,16 @@ export function WorldStateProvider({ children }) {
                 const completedTask = {
                   taskId: taskIdToComplete,
                   completedAt: Date.now(),
-                  ...payload // Include any additional data like score, results, etc.
+                  ...payload, // Include any additional data like score, results, etc.
                 };
                 newState.completedTasks = [...prev.completedTasks, completedTask];
-                eventToPublish = { name: 'task_completed', data: completedTask };
+                
+                // IMPORTANT: Also remove from unlockedTasks to prevent re-display in UI
+                if (prev.unlockedTasks.includes(taskIdToComplete)) {
+                    newState.unlockedTasks = prev.unlockedTasks.filter(id => id !== taskIdToComplete);
+                }
+
+                eventToPublish = { name: 'task_completed', data: { ...completedTask } };
                 console.log(`[WorldStateContext] Task '${taskIdToComplete}' completed.`);
               }
             }
@@ -793,6 +799,7 @@ export function WorldStateProvider({ children }) {
         publishEvent('requestWorldStateUpdate', { target: 'tasks', action: 'unlock', payload: { taskId } });
     },
     completeTask: (taskId, additionalData = {}) => {
+        console.log(`[WorldStateContext] completeTask method invoked for taskId: '${taskId}'. Publishing 'requestWorldStateUpdate'.`);
         publishEvent('requestWorldStateUpdate', { target: 'tasks', action: 'complete', payload: { taskId, ...additionalData } });
     },
     attemptSolvePuzzle,

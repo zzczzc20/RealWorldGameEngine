@@ -228,9 +228,7 @@ export default class ScriptParser {
   }
 
   notify(eventName, data = {}) {
-     console.log(`[ScriptParser NOTIFY CALLED] Current step ID before processing: ${this.current}, Event: ${eventName}, Script ID: ${this.tree?.scriptId}`); // ADD THIS LINE
-     // Log entry state
-     // console.log(`[ScriptParser ENTRY] Event: '${eventName}', Current Step ID: ${this.current}, Finished: ${this.finished}`); // Original log, can be kept or removed
+    console.log(`[ScriptParser NOTIFY] Script:'${this.tree?.scriptId}' | Step:${this.current} | Event:'${eventName}'`, data);
 
      if (this.finished) {
          console.log(`[ScriptParser EXIT] Engine finished.`);
@@ -343,35 +341,36 @@ export default class ScriptParser {
        case 'WAIT_FOR_TASK_COMPLETED':
          const taskIdToWaitFor = step.taskId;
          let isTaskCompleted = false;
+         
+         console.log(`[ScriptParser WAIT_FOR_TASK] Now at step ${this.current}, waiting for task: '${taskIdToWaitFor}'`);
 
-         // Check if the current event is the 'task_completed' event for the specific task this step is waiting for
+         // Check 1: Is the incoming event the one we're waiting for?
          if (eventName === 'task_completed' && eventData && eventData.taskId === taskIdToWaitFor) {
-           console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_TASK_COMPLETED): Received 'task_completed' event for target task '${taskIdToWaitFor}'.`);
+           console.log(`[ScriptParser WAIT_FOR_TASK] ----> SUCCESS: Event '${eventName}' matches waiting task ID.`);
            isTaskCompleted = true;
          } else {
-           // Check the current world state to see if the task is already completed
-           const taskState = currentWorldState.completedTasks && currentWorldState.completedTasks.find(t => t.taskId === taskIdToWaitFor);
-           if (taskState) {
-             console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_TASK_COMPLETED): Task '${taskIdToWaitFor}' is already marked as completed in worldState.`);
+           // Check 2: If the event doesn't match, check the persistent world state.
+           const completedTaskInState = currentWorldState.completedTasks?.find(t => t.taskId === taskIdToWaitFor);
+           if (completedTaskInState) {
+             console.log(`[ScriptParser WAIT_FOR_TASK] ----> SUCCESS: Task found in persistent worldState.completedTasks.`);
              isTaskCompleted = true;
            }
          }
 
          if (isTaskCompleted) {
            next = step.nextStep;
-           console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_TASK_COMPLETED): Task '${taskIdToWaitFor}' is completed. Proceeding to step '${next}'.`);
-           // Store event data if this step was unblocked by the task_completed event
-           if (eventName === 'task_completed' && eventData && eventData.taskId === taskIdToWaitFor) {
-             this.lastEventData = eventData;
+           console.log(`[ScriptParser WAIT_FOR_TASK] RESULT: Task is complete. Transitioning to nextStep: ${next}.`);
+           if (eventName === 'task_completed' && eventData.taskId === taskIdToWaitFor) {
+             this.lastEventData = eventData; // Preserve event data for next step
            }
          } else {
-           // Task is not completed
-           if (typeof step.stepIdOnWait !== 'undefined' && step.stepIdOnWait !== null) {
+           // Task is not completed, decide whether to loop or stay put.
+           if (step.stepIdOnWait !== undefined && step.stepIdOnWait !== null) {
              next = step.stepIdOnWait;
-             console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_TASK_COMPLETED): Task '${taskIdToWaitFor}' not completed. Diverting to stepIdOnWait: '${next}'.`);
+             console.log(`[ScriptParser WAIT_FOR_TASK] RESULT: Task NOT complete. Diverting to stepIdOnWait: ${next}.`);
            } else {
-             // No stepIdOnWait, so the script pauses on this step
-             console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_TASK_COMPLETED): Task '${taskIdToWaitFor}' not completed. Pausing and waiting for 'task_completed' event.`);
+             console.log(`[ScriptParser WAIT_FOR_TASK] RESULT: Task NOT complete. Pausing on current step.`);
+             // 'next' remains null, so the parser doesn't transition.
            }
          }
          break;
