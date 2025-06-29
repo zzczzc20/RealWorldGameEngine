@@ -196,7 +196,16 @@ export default class ScriptParser {
   }
  
   _stepRequiresInteraction(stepType) {
-      return ['dialogue', 'aiDialogue', 'waitForEvent', 'branch', 'aiDecision'].includes(stepType);
+      const interactiveTypes = [
+        'dialogue', // Waits for player to click through
+        'aiDialogue', // Waits for AI to respond and player to close
+        'waitForEvent', // Waits for an external event
+        'WAIT_FOR_TASK_COMPLETED', // Waits for task completion
+        'WAIT_FOR_PUZZLE_SOLVED', // Waits for puzzle completion
+        'aiDecision', // Waits for AI service to respond
+        'choices' // Waits for player to make a choice
+      ];
+      return interactiveTypes.includes(stepType);
   }
 
   _isInteractionEventForStep(step, eventName, data = {}) {
@@ -228,438 +237,223 @@ export default class ScriptParser {
   }
 
   notify(eventName, data = {}) {
-    console.log(`[ScriptParser NOTIFY] Script:'${this.tree?.scriptId}' | Step:${this.current} | Event:'${eventName}'`, data);
+    console.log(`[ScriptParser] Received event '${eventName}'. Starting processing loop.`);
+    if (this.finished) {
+      console.log(`[ScriptParser] Engine is finished. Ignoring event.`);
+      return;
+    }
 
-     if (this.finished) {
-         console.log(`[ScriptParser EXIT] Engine finished.`);
-         return;
-     }
+    let worldState = data.worldState || (this.getWorldState ? this.getWorldState() : {});
+    this.lastEventData = data || null; // Store data from the triggering event
 
-     const currentWorldState = data?.worldState || {};
-     const eventData = data || {};
+    let canContinue = true;
+    let loopCount = 0; // Safety break for the loop
+    const MAX_LOOPS = 50;
 
-     const step = this.getCurrentStep();
-     if (!step) {
-         console.log(`[ScriptParser EXIT] No valid current step object found for ID: ${this.current}`);
-         return;
-     }
+    while (canContinue && loopCount < MAX_LOOPS) {
+      loopCount++;
+      const step = this.getCurrentStep();
+      if (!step) {
+        this.finished = true;
+        console.log(`[ScriptParser] No current step found. Finishing script.`);
+        break;
+      }
+      
+      console.log(`[ScriptParser LOOP #${loopCount}] Processing Step: ${step.stepId}, Type: ${step.type}`);
 
-     // Use eventData from the previous step if available for condition checks
-     const dataForCondition = this.lastEventData || eventData;
-     // Clear lastEventData after retrieving it for use in this step's evaluation
-     if (this.lastEventData) {
-         // console.log(`[ScriptParser] Using lastEventData for step ${this.current}:`, this.lastEventData);
-         this.lastEventData = null;
-     }
+      this._stateUpdatePublished = false; // Reset for each step in the loop
+      let nextStepId = this._executeStep(step, worldState, this.lastEventData, eventName);
+      
+      const requiresInteraction = this._stepRequiresInteraction(step.type);
 
+      if (requiresInteraction) {
+        console.log(`[ScriptParser] Step ${step.stepId} (${step.type}) requires interaction. Pausing execution loop.`);
+        canContinue = false; // Stop the loop and wait for the next event
+      }
+      
+      if (nextStepId !== null && typeof nextStepId !== 'undefined') {
+        const previousStepId = this.current;
+        this.current = nextStepId;
 
-     console.log(`[ScriptParser] Current step: ${this.current}, Type: ${step.type}, Event: ${eventName}`);
+        if (!this.tree.steps[this.current]) {
+          console.error(`ScriptEngine Error: Invalid next stepId ${this.current} from step ${previousStepId}. Finishing script.`);
+          this.finished = true;
+          publish('scriptFinished', { scriptId: this.tree.scriptId });
+          break;
+        }
 
-     let next = null;
-     this._stateUpdatePublished = false;
-
-     // --- 新增：处理玩家选择事件 ---
-     if (step.choices && eventName === 'playerChoiceMade') {
-       const chosenNextStep = eventData.nextStep;
-       // 验证玩家的选择是否合法
-       if (step.choices.some(c => c.nextStep === chosenNextStep)) {
-         console.log(`[ScriptParser] Player choice made. Proceeding to step: ${chosenNextStep}`);
-         next = chosenNextStep;
-       } else {
-         console.warn(`[ScriptParser] Invalid choice received: ${chosenNextStep}. Ignoring.`);
-       }
-     }
-     // --------------------------------
-
-     // --- Resolve Placeholders (Just before use) ---
-     let resolvedPrompt = step.prompt;
-     if ((step.type === 'aiDialogue' || step.type === 'aiDecision') && step.prompt) {
-         resolvedPrompt = this._resolvePlaceholders(step.prompt, currentWorldState, eventData);
-         if (resolvedPrompt !== step.prompt) {
-             this.tree.steps[this.current] = { ...step, prompt: resolvedPrompt };
-         }
-     }
-     let resolvedText = step.text;
-      if (step.type === 'dialogue' && step.text) {
-          resolvedText = this._resolvePlaceholders(step.text, currentWorldState, eventData);
-          if (resolvedText !== step.text) {
-              this.tree.steps[this.current] = { ...step, text: resolvedText };
-          }
+        console.log(`[ScriptParser] Advanced from ${previousStepId} to ${this.current}.`);
+        this.lastEventData = null; // Clear event data after a transition
+        eventName = 'scriptStep'; // Subsequent steps in the loop are triggered internally
+        worldState = this.getWorldState ? this.getWorldState() : worldState; // Refresh world state
+      } else {
+        // No next step determined, so the script logic is paused.
+        console.log(`[ScriptParser] No immediate next step from ${step.stepId}. Pausing.`);
+        canContinue = false;
       }
 
+      if (loopCount >= MAX_LOOPS) {
+        console.error(`[ScriptParser] Maximum loop count of ${MAX_LOOPS} reached. Breaking to prevent infinite loop. Problem might be in script logic around step ${step.stepId}.`);
+        this.finished = true;
+        break;
+      }
+    }
 
-     // --- Process Step Logic ---
-     switch (step.type) {
-       case 'dialogue':
-         // 如果当前步骤有选项，它不应该通过 dialogueClosed 事件推进。
-         // 它必须等待 'playerChoiceMade' 事件。
-         if (step.choices) {
-           // 什么都不做，等待选择事件
-         } else if (eventName === 'dialogueClosed') {
-           next = step.next;
-         }
-         break;
-       case 'aiDialogue':
-         if (eventName === 'scriptStep') {
-           // 发布 requestAIDialogue 事件时，尝试包含聊天历史记录
-           // 由于 ScriptParser 无法直接访问聊天历史记录，我们需要通过 EventService 获取
-           const normalizedAiDialoguePersona = normalizePersonaId(step.persona);
-           const normalizedAiDialogueOwner = normalizePersonaId(step.owner || step.persona);
-            const worldState = this.getWorldState ? this.getWorldState() : {};
-            const history = worldState.chatHistories ? (worldState.chatHistories[normalizedAiDialogueOwner] || []) : [];
-           publish('requestAIDialogue', {
-             scriptId: this.tree.scriptId,
-             stepId: this.current,
-             prompt: resolvedPrompt,
-             persona: normalizedAiDialoguePersona,
-             owner: normalizedAiDialogueOwner,
-             history: history,
-             audio: step.audio || null // 包含音频字段
-           }, eventName);
-         } else if (eventName === 'dialogueClosed') {
-           next = step.next;
-         }
-         break;
-       case 'UNLOCK_TASK':
-         if (!this._stateUpdatePublished) {
-           if (step.taskId) {
-             publish('requestWorldStateUpdate', {
-               target: 'tasks',
-               action: 'unlock',
-               payload: {
-                 taskId: step.taskId
-               }
-             }, eventName);
-             this._stateUpdatePublished = true;
-             console.log(`[ScriptParser] Step ${this.current}: Requested to unlock task '${step.taskId}'.`);
-           } else {
-             console.warn(`[ScriptParser] Step ${this.current} (UNLOCK_TASK): Missing taskId.`);
-           }
-         }
-         next = step.nextStep;
-         break;
-       case 'WAIT_FOR_TASK_COMPLETED':
-         const taskIdToWaitFor = step.taskId;
-         let isTaskCompleted = false;
-         
-         console.log(`[ScriptParser WAIT_FOR_TASK] Now at step ${this.current}, waiting for task: '${taskIdToWaitFor}'`);
+    // After the loop, if we're on a step that needs to publish something (like a dialogue), do it now.
+    const finalStep = this.getCurrentStep();
+    if (finalStep && !this.finished) {
+      console.log(`[ScriptParser] Loop finished. Final step is ${finalStep.stepId}. Publishing 'scriptStep' event.`);
+      const stepForPublish = { ...finalStep, audio: finalStep.audio || null };
+      if (stepForPublish.persona) stepForPublish.persona = normalizePersonaId(stepForPublish.persona);
+      if (stepForPublish.owner) stepForPublish.owner = normalizePersonaId(stepForPublish.owner);
+      const finalOwner = stepForPublish.owner || stepForPublish.persona;
 
-         // Check 1: Is the incoming event the one we're waiting for?
-         if (eventName === 'task_completed' && eventData && eventData.taskId === taskIdToWaitFor) {
-           console.log(`[ScriptParser WAIT_FOR_TASK] ----> SUCCESS: Event '${eventName}' matches waiting task ID.`);
-           isTaskCompleted = true;
-         } else {
-           // Check 2: If the event doesn't match, check the persistent world state.
-           const completedTaskInState = currentWorldState.completedTasks?.find(t => t.taskId === taskIdToWaitFor);
-           if (completedTaskInState) {
-             console.log(`[ScriptParser WAIT_FOR_TASK] ----> SUCCESS: Task found in persistent worldState.completedTasks.`);
-             isTaskCompleted = true;
-           }
-         }
+      publish('scriptStep', {
+        scriptId: this.tree.scriptId,
+        step: { ...stepForPublish, owner: finalOwner },
+        worldState: worldState
+      });
+    }
+  }
 
-         if (isTaskCompleted) {
-           next = step.nextStep;
-           console.log(`[ScriptParser WAIT_FOR_TASK] RESULT: Task is complete. Transitioning to nextStep: ${next}.`);
-           if (eventName === 'task_completed' && eventData.taskId === taskIdToWaitFor) {
-             this.lastEventData = eventData; // Preserve event data for next step
-           }
-         } else {
-           // Task is not completed, decide whether to loop or stay put.
-           if (step.stepIdOnWait !== undefined && step.stepIdOnWait !== null) {
-             next = step.stepIdOnWait;
-             console.log(`[ScriptParser WAIT_FOR_TASK] RESULT: Task NOT complete. Diverting to stepIdOnWait: ${next}.`);
-           } else {
-             console.log(`[ScriptParser WAIT_FOR_TASK] RESULT: Task NOT complete. Pausing on current step.`);
-             // 'next' remains null, so the parser doesn't transition.
-           }
-         }
-         break;
-       case 'waitForEvent':
-         // Ensure the event name matches what the step is waiting for
-         if (eventName === step.eventName) {
-           // Check condition using the actual event data that arrived
-           console.log(`[ScriptParser] waitForEvent received matching event '${eventName}' at step ${this.current}. Evaluating condition with eventData:`, eventData);
-           if (!step.condition || this._evaluateConditionClause(step.condition, currentWorldState, eventData)) { // Use current eventData here
-               console.log(`[ScriptParser] waitForEvent '${eventName}' condition PASSED at step ${this.current}.`);
-               next = step.nextStep;
-               // Store the event data that satisfied this wait, so the *next* step can use it
-               this.lastEventData = eventData;
-               // console.log(`[ScriptParser] Storing lastEventData for step ${next}:`, eventData);
-           } else {
-               console.log(`[ScriptParser] waitForEvent '${eventName}' received, but condition FAILED at step ${this.current}. Condition:`, step.condition);
-           }
-         } else {
-             // Log only if the current step IS a waitForEvent, but the incoming event doesn't match
-             if (step.type === 'waitForEvent') {
-                console.log(`[ScriptParser] waitForEvent ignored event '${eventName}' (waiting for '${step.eventName}') at step ${this.current}`);
-             }
-         }
-         break;
-       case 'branch':
-         // Evaluate condition using dataForCondition (might be from previous event)
-         const finalResult = this._evaluateConditionClause(step.condition, currentWorldState, dataForCondition);
-         console.log(`[ScriptParser] Branch step ${this.current} condition result: ${finalResult}`); // Log branch result
-         next = finalResult ? step.nextStepOnTrue : step.nextStepOnFalse;
-         break;
-       case 'updateWorldState':
-         if (!this._stateUpdatePublished) {
-           let resolvedValue = step.value;
-           if (typeof resolvedValue === 'string') {
-             resolvedValue = this._resolvePlaceholders(resolvedValue, currentWorldState, eventData);
-           } else if (typeof resolvedValue === 'object' && resolvedValue !== null) {
-             resolvedValue = this._resolveObjectPlaceholders(resolvedValue, currentWorldState, eventData);
-           }
-           
-           let eventPayload = {
-             target: step.target,
-             id: step.id,
-             property: step.property,
-             value: resolvedValue,
-             merge: resolvedValue?._update_ === true
-           };
+  _executeStep(step, worldState, eventData, eventName) {
+    let next = null;
 
-           if (step.target === 'persona' && step.id) {
-             const authoritativePersonaId = normalizePersonaId(step.id);
-             if (authoritativePersonaId !== step.id) {
-               console.log(`[ScriptParser] Normalizing persona ID for updateWorldState: '${step.id}' to '${authoritativePersonaId}'`);
-             }
-             eventPayload.id = authoritativePersonaId;
-           }
-           
-           console.log(`[ScriptParser] Publishing 'requestWorldStateUpdate' with payload:`, JSON.stringify(eventPayload));
-           publish('requestWorldStateUpdate', eventPayload, eventName);
-           this._stateUpdatePublished = true;
-         }
-         next = step.nextStep; // Use nextStep consistently
-         break;
-       case 'UNLOCK_CLUE':
-         if (!this._stateUpdatePublished) {
-           if (step.clueId) {
-             publish('requestWorldStateUpdate', {
-               target: 'discoveredClues',
-               action: 'addById',
-               payload: {
-                 clueId: step.clueId
-               }
-             }, eventName); // Pass eventName for context if needed by publish
-             this._stateUpdatePublished = true;
-             console.log(`[ScriptParser] Step ${this.current}: Requested to unlock clue '${step.clueId}'.`);
-           } else {
-             console.warn(`[ScriptParser] Step ${this.current} (UNLOCK_CLUE): Missing clueId.`);
-           }
-         }
-         next = step.nextStep; // UNLOCK_CLUE proceeds to nextStep
-         break;
-       case 'aiDecision':
+    // --- Resolve Placeholders ---
+    let resolvedPrompt = step.prompt;
+    if ((step.type === 'aiDialogue' || step.type === 'aiDecision') && step.prompt) {
+        resolvedPrompt = this._resolvePlaceholders(step.prompt, worldState, eventData);
+    }
+    let resolvedText = step.text;
+    if (step.type === 'dialogue' && step.text) {
+        resolvedText = this._resolvePlaceholders(step.text, worldState, eventData);
+    }
+
+    // --- Process Step Logic ---
+    switch (step.type) {
+      case 'dialogue':
+      case 'choices':
+        if (step.choices) {
+          if (eventName === 'playerChoiceMade' && eventData.nextStep) {
+            next = eventData.nextStep;
+          }
+        } else if (eventName === 'dialogueClosed') {
+          next = step.next;
+        }
+        break;
+      case 'aiDialogue':
+        if (eventName === 'scriptStep') {
+          const normalizedAiDialoguePersona = normalizePersonaId(step.persona);
+          const normalizedAiDialogueOwner = normalizePersonaId(step.owner || step.persona);
+          const history = worldState.chatHistories ? (worldState.chatHistories[normalizedAiDialogueOwner] || []) : [];
+          publish('requestAIDialogue', {
+            scriptId: this.tree.scriptId, stepId: this.current, prompt: resolvedPrompt,
+            persona: normalizedAiDialoguePersona, owner: normalizedAiDialogueOwner, history: history, audio: step.audio || null
+          });
+        } else if (eventName === 'dialogueClosed') {
+          next = step.next;
+        }
+        break;
+      case 'WAIT_FOR_TASK_COMPLETED':
+        if (eventName === 'task_completed' && eventData?.taskId === step.taskId) {
+            next = step.nextStep;
+        } else if (worldState.completedTasks?.find(t => t.taskId === step.taskId)) {
+            next = step.nextStep;
+        } else {
+            next = step.stepIdOnWait !== undefined ? step.stepIdOnWait : null;
+        }
+        break;
+      case 'waitForEvent':
+        if (eventName === step.eventName && (!step.condition || this._evaluateConditionClause(step.condition, worldState, eventData))) {
+            next = step.nextStep;
+        }
+        break;
+      case 'branch':
+        const finalResult = this._evaluateConditionClause(step.condition, worldState, eventData);
+        next = finalResult ? step.onTrue : step.nextStepOnTrue;
+        if (!finalResult) {
+            next = step.onFalse !== undefined ? step.onFalse : step.nextStepOnFalse;
+        }
+        break;
+      case 'WAIT_FOR_PUZZLE_SOLVED':
+        if (eventName === 'puzzle_solved' && eventData?.puzzleId === step.puzzleId) {
+            next = step.nextStep;
+        } else if (worldState.currentPuzzleState?.[step.puzzleId]?.status === 'solved') {
+            next = step.nextStep;
+        } else {
+            next = step.stepIdOnWait !== undefined ? step.stepIdOnWait : null;
+        }
+        break;
+      case 'aiDecision':
          if (eventName === 'scriptStep') {
            const normalizedAiDecisionPersona = normalizePersonaId(step.persona);
            publish('requestAIDecision', {
-             scriptId: this.tree.scriptId,
-             stepId: this.current,
-             prompt: resolvedPrompt,
-             persona: normalizedAiDecisionPersona,
-             options: step.options,
-             defaultNextStep: step.defaultNextStep
-           }, eventName);
+             scriptId: this.tree.scriptId, stepId: this.current, prompt: resolvedPrompt,
+             persona: normalizedAiDecisionPersona, options: step.options, defaultNextStep: step.defaultNextStep
+           });
          } else if (eventName === 'aiDecisionResult' && eventData?.nextStep) {
-           next = eventData.nextStep; // This comes from AIService
-           console.log(`[ScriptParser] AI decision result received for step ${this.current}, transitioning to step ${next}`);
-         }
-         // Do not use defaultNextStep immediately for other events; wait for aiDecisionResult
-         // This prevents premature transition before AI decision is received
-         break;
-       case 'DISPLAY_SVM_CONTENT':
-         if (!this._stateUpdatePublished) {
-           if (step.svmId && typeof step.contentValueOrKey === 'string') {
-             let displayValue = null;
-             if (step.contentType === 'text') {
-               displayValue = {
-                 type: 'text',
-                 content: step.contentValueOrKey
-               };
-               console.log(`[ScriptParser] Step ${this.current}: Requested to display text on SVM '${step.svmId}': "${step.contentValueOrKey}"`);
-             } else if (step.contentType === 'image') {
-               displayValue = {
-                 type: 'image', // Indicate to SvmDetailView this is an image type
-                 mediaKey: step.contentValueOrKey // Pass the mediaKey
-               };
-               console.log(`[ScriptParser] Step ${this.current}: Requested to display image with mediaKey '${step.contentValueOrKey}' on SVM '${step.svmId}'.`);
-             } else if (step.contentType === 'audio') {
-               displayValue = {
-                 type: 'audio', // Indicate to SvmDetailView this is an audio type
-                 mediaKey: step.contentValueOrKey // Pass the mediaKey for audio
-               };
-               console.log(`[ScriptParser] Step ${this.current}: Requested to play audio with mediaKey '${step.contentValueOrKey}' on SVM '${step.svmId}'.`);
-             }
-
-             if (displayValue) {
-               publish('requestWorldStateUpdate', {
-                 target: 'svm',
-                 id: step.svmId,
-                 property: 'currentDisplay',
-                 value: displayValue
-               }, eventName);
-               this._stateUpdatePublished = true;
-             } else {
-               console.warn(`[ScriptParser] Step ${this.current} (DISPLAY_SVM_CONTENT): Unsupported contentType ('${step.contentType}') or invalid parameters. SVM ID: ${step.svmId}, ContentType: ${step.contentType}, ContentValue: ${step.contentValueOrKey}`);
-             }
-           } else {
-             // This else handles missing svmId or contentValueOrKey
-             console.warn(`[ScriptParser] Step ${this.current} (DISPLAY_SVM_CONTENT): Missing svmId or contentValueOrKey. SVM ID: ${step.svmId}, ContentValue: ${step.contentValueOrKey}`);
-           }
-         }
-         next = step.nextStep; // Proceed to the next step
-         break;
-       case 'ACTIVATE_PUZZLE': // New action type for Step 3.3
-         if (!this._stateUpdatePublished) {
-           if (step.puzzleId && typeof step.puzzleId === 'string') {
-             publish('requestWorldStateUpdate', {
-               target: 'puzzleControl', // Changed target to 'puzzleControl' for consistency with WorldStateContext
-               action: 'activatePuzzle',    // The action to be performed by WorldStateContext
-               payload: {
-                 puzzleId: step.puzzleId
-               }
-             }, eventName);
-             this._stateUpdatePublished = true;
-             console.log(`[ScriptParser] Step ${this.current}: Requested to activate puzzle '${step.puzzleId}'.`);
-           } else {
-             console.warn(`[ScriptParser] Step ${this.current} (ACTIVATE_PUZZLE): Missing or invalid puzzleId.`);
-           }
-         }
-         next = step.nextStep;
-         break;
-       case 'WAIT_FOR_PUZZLE_SOLVED': // New action type for Step 3.4
-         const puzzleIdToWaitFor = step.puzzleId;
-         let isPuzzleSolved = false;
-
-         // Check if the current event is the 'puzzle_solved' event for the specific puzzle this step is waiting for.
-         if (eventName === 'puzzle_solved' && eventData && eventData.puzzleId === puzzleIdToWaitFor) {
-           console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_PUZZLE_SOLVED): Received 'puzzle_solved' event for target puzzle '${puzzleIdToWaitFor}'.`);
-           isPuzzleSolved = true;
-         } else {
-           // If not directly triggered by the event, check the current world state.
-           // This handles cases where the script lands on this step and the puzzle is already solved,
-           // or if other events trigger a re-evaluation.
-           const puzzleState = currentWorldState.currentPuzzleState && currentWorldState.currentPuzzleState[puzzleIdToWaitFor];
-           if (puzzleState && puzzleState.status === 'solved') {
-             console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_PUZZLE_SOLVED): Puzzle '${puzzleIdToWaitFor}' is already marked as 'solved' in worldState.`);
-             isPuzzleSolved = true;
-           }
-         }
-
-         if (isPuzzleSolved) {
-           next = step.nextStep;
-           console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_PUZZLE_SOLVED): Puzzle '${puzzleIdToWaitFor}' is solved. Proceeding to step '${next}'.`);
-           // If this step was unblocked specifically by the 'puzzle_solved' event, store its data.
-           if (eventName === 'puzzle_solved' && eventData && eventData.puzzleId === puzzleIdToWaitFor) {
-               this.lastEventData = eventData;
-               // console.log(`[ScriptParser] Storing lastEventData from puzzle_solved for next step:`, eventData);
-           }
-         } else {
-           // Puzzle is not solved.
-           if (typeof step.stepIdOnWait !== 'undefined' && step.stepIdOnWait !== null) {
-             next = step.stepIdOnWait;
-             console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_PUZZLE_SOLVED): Puzzle '${puzzleIdToWaitFor}' not solved. Diverting to stepIdOnWait: '${next}'.`);
-           } else {
-             // No stepIdOnWait, so the script effectively "pauses" on this step.
-             // 'next' remains null for this notify call. It will re-evaluate when another event comes in.
-             console.log(`[ScriptParser] Step ${this.current} (WAIT_FOR_PUZZLE_SOLVED): Puzzle '${puzzleIdToWaitFor}' not solved. Pausing and waiting for 'puzzle_solved' event.`);
-           }
+           next = eventData.nextStep;
          }
          break;
-       case 'UPDATE_PUZZLE_STATE': // New action type for Step 4.1
-         if (!this._stateUpdatePublished) {
-           if (step.puzzleId && typeof step.puzzleId === 'string' &&
-               step.path && typeof step.path === 'string' &&
-               typeof step.value !== 'undefined') {
-             
-             let resolvedValue = step.value;
-             // Resolve placeholders in value if it's a string or an object containing strings
-             if (typeof resolvedValue === 'string') {
-               resolvedValue = this._resolvePlaceholders(resolvedValue, currentWorldState, eventData);
-             } else if (typeof resolvedValue === 'object' && resolvedValue !== null) {
-               resolvedValue = this._resolveObjectPlaceholders(resolvedValue, currentWorldState, eventData);
-             }
+      // --- Default handler for all automatic, non-interactive steps ---
+      default:
+        if (!this._stepRequiresInteraction(step.type)) {
+          if (!this._stateUpdatePublished) {
+              this._executeAutomaticAction(step, worldState, eventData);
+              this._stateUpdatePublished = true;
+          }
+          next = step.nextStep !== undefined ? step.nextStep : step.next;
+        }
+        if (step.endScript === true) {
+            this.finished = true;
+            publish('scriptFinished', { scriptId: this.tree.scriptId });
+            return null;
+        }
+        break;
+    }
+    return next;
+  }
 
-             publish('requestWorldStateUpdate', {
-               target: 'puzzleStateProperty', // This target should be handled by WorldStateContext
-               action: 'set', // The action to perform
-               payload: {
-                 puzzleId: step.puzzleId,
-                 path: step.path,       // Dot-notation path within the puzzle object e.g., "variables.keyFound"
-                 value: resolvedValue   // The new value for the path
-               }
-             }, eventName);
-             this._stateUpdatePublished = true;
-             console.log(`[ScriptParser] Step ${this.current} (UPDATE_PUZZLE_STATE): Requested update for puzzle '${step.puzzleId}', path '${step.path}' to value:`, resolvedValue);
-           } else {
-             console.warn(`[ScriptParser] Step ${this.current} (UPDATE_PUZZLE_STATE): Missing or invalid parameters. Required: puzzleId, path, value. Received step:`, step);
-           }
-         }
-         next = step.nextStep; // Proceed to the next step after publishing
-         break;
-
-       case 'TRIGGER_DATA_SYNC': // New action type for requesting data synchronization
-         // This action primarily publishes an event that other services (like WorldStateContext) will listen to.
-         // It doesn't directly modify world state here but signals an intent.
-         // We can use _stateUpdatePublished to ensure the event is published only once if the step is re-evaluated
-         // without advancing, though for a sync trigger, multiple triggers might be acceptable depending on design.
-         // For consistency with other event-publishing actions, let's manage it.
-         if (!this._stateUpdatePublished) {
-           console.count('[ScriptParser] TRIGGER_DATA_SYNC action execution count'); // Add this log
-           console.log(`[ScriptParser] Step ${this.current} (${step.type}): Publishing SYNC_DATA_TO_BACKEND event with payload:`, step.payload || {});
-           publish('SYNC_DATA_TO_BACKEND', step.payload || {}); // step.payload can be used to pass options
-           this._stateUpdatePublished = true;
-         }
-         next = step.nextStep;
-         break;
-
-       default:
-         // console.warn(`[ScriptParser] Unknown step type: ${step.type} at step ${this.current}`);
-         break;
-     }
-
-     // --- Advance Step ---
-     const previousStepId = this.current;
-     if (next !== null && typeof next !== 'undefined') {
-       this.current = next;
-       const nextStepExists = this.tree.steps[this.current];
-       if (!nextStepExists) {
-         console.error(`ScriptEngine Error: Invalid next stepId ${this.current} from step ${previousStepId}. Finishing script.`);
-         this.finished = true; this.current = null;
-         publish('scriptFinished', { scriptId: this.tree.scriptId });
-       } else {
-         console.log(`[ScriptParser] Transitioning from step ${previousStepId} to step ${this.current} due to event '${eventName}'`);
-         
-         const stepForPublish = { ...nextStepExists, audio: nextStepExists.audio || null };
-         if (stepForPublish.persona) stepForPublish.persona = normalizePersonaId(stepForPublish.persona);
-         if (stepForPublish.owner) stepForPublish.owner = normalizePersonaId(stepForPublish.owner);
-         // Ensure owner fallback uses normalized persona if owner is not defined
-         const finalOwner = stepForPublish.owner || stepForPublish.persona;
-
-         publish('scriptStep', {
-           scriptId: this.tree.scriptId,
-           step: { ...stepForPublish, owner: finalOwner },
-           worldState: currentWorldState
-         });
-       }
-     } else if (step.choices && eventName !== 'playerChoiceMade') {
-         // 如果步骤有选项，并且当前事件不是选择事件，则脚本暂停。
-         // `next` 保持为 null，脚本不会前进。
-         console.log(`[ScriptParser] Step ${this.current} is paused, waiting for player choice.`);
-     } else if (step.endScript === true) {
-       const isInteractionEvent = this._isInteractionEventForStep(step, eventName, eventData);
-       if (isInteractionEvent) {
-         console.log(`[ScriptParser] Script ending at step ${this.current} due to endScript flag and interaction event '${eventName}'`);
-         this.finished = true; this.current = null;
-         publish('scriptFinished', { scriptId: this.tree.scriptId });
-       }
-     }
-
-     if (this.current === null && !this.finished) {
-         this.finished = true;
-         publish('scriptFinished', { scriptId: this.tree.scriptId });
-     }
+  _executeAutomaticAction(step, worldState, eventData) {
+      console.log(`[ScriptParser EXECUTE AUTO] Running action for type: ${step.type}`);
+      switch (step.type) {
+          case 'UNLOCK_TASK':
+              publish('requestWorldStateUpdate', { target: 'tasks', action: 'unlock', payload: { taskId: step.taskId } });
+              console.log(`[ScriptParser] Published unlock for task '${step.taskId}'.`);
+              break;
+          case 'updateWorldState':
+              let resolvedValue = step.value;
+              if (typeof resolvedValue === 'string') resolvedValue = this._resolvePlaceholders(resolvedValue, worldState, eventData);
+              else if (typeof resolvedValue === 'object' && resolvedValue !== null) resolvedValue = this._resolveObjectPlaceholders(resolvedValue, worldState, eventData);
+              publish('requestWorldStateUpdate', { target: step.target, id: step.id, property: step.property, value: resolvedValue });
+              break;
+          case 'UNLOCK_CLUE':
+              publish('requestWorldStateUpdate', { target: 'discoveredClues', action: 'addById', payload: { clueId: step.clueId } });
+              break;
+          case 'ACTIVATE_PUZZLE':
+              publish('requestWorldStateUpdate', { target: 'puzzleControl', action: 'activatePuzzle', payload: { puzzleId: step.puzzleId } });
+              break;
+          case 'DISPLAY_SVM_CONTENT': { // Added block scope
+              let displayValue = null;
+              if (step.contentType === 'text') displayValue = { type: 'text', content: step.contentValueOrKey };
+              else if (step.contentType === 'image') displayValue = { type: 'image', mediaKey: step.contentValueOrKey };
+              else if (step.contentType === 'audio') displayValue = { type: 'audio', mediaKey: step.contentValueOrKey };
+              if (displayValue) {
+                  publish('requestWorldStateUpdate', { target: 'svm', id: step.svmId, property: 'currentDisplay', value: displayValue });
+              }
+              break;
+            }
+          case 'UPDATE_PUZZLE_STATE': { // Added block scope
+              let resolvedVal = step.value;
+              if (typeof resolvedVal === 'string') resolvedVal = this._resolvePlaceholders(resolvedVal, worldState, eventData);
+              else if (typeof resolvedVal === 'object' && resolvedVal !== null) resolvedVal = this._resolveObjectPlaceholders(resolvedVal, worldState, eventData);
+              publish('requestWorldStateUpdate', { target: 'puzzleStateProperty', action: 'set', payload: { puzzleId: step.puzzleId, path: step.path, value: resolvedVal } });
+              break;
+            }
+          case 'TRIGGER_DATA_SYNC':
+              publish('SYNC_DATA_TO_BACKEND', step.payload || {});
+              break;
+      }
   }
 
   isFinished() { return this.finished; }

@@ -103,10 +103,54 @@ const tasks = [
   //   successMessage: "Network connection re-established.", // Message for UI on success
   //   failureMessage: "Access Denied. Incorrect Code.", // Message for UI on failure
   // },
-];
-
-// --- 逻辑拼图任务: AKHE ---
-tasks.push({
+  {
+    "taskId": "KGF_Blueprint_Puzzle",
+    "taskName": "KGF's Blueprint",
+    "type": "BLUEPRINT_PUZZLE",
+    "description": "Decipher the paradoxical design principles in KGF's blueprint to uncover its true purpose.",
+    "puzzleData": {
+      "cameraPosition": [0, 5, 15],
+      "notes": [
+        "A sanctuary is a cage.",
+        "An exit is a trap.",
+        "The most stable support comes from the void."
+      ],
+      "nodes": [
+        {
+          "id": "node_sanctuary",
+          "name": "Sanctuary Module",
+          "paradoxRule": "CAGE",
+          "initialState": { "position": [-5, 0, 0], "rotation": [0, 0, 0], "scale": [2, 2, 2] },
+          "correctState": { "rotation": [0, 3.14159, 0] },
+          "meshType": "box",
+          "color": "#4a90e2"
+        },
+        {
+          "id": "node_exit",
+          "name": "Exit Archway",
+          "paradoxRule": "TRAP",
+          "initialState": { "position": [5, 0, 0], "rotation": [0, 0, 0], "scale": [1, 3, 1] },
+          "correctState": { "scale": [1, -3, 1] },
+          "meshType": "box",
+          "color": "#e24a4a"
+        },
+        {
+          "id": "node_support",
+          "name": "Support Pillar",
+          "paradoxRule": "VOID",
+          "initialState": { "position": [0, 0, -5], "rotation": [0, 0, 0], "scale": [1, 4, 1] },
+          "correctState": { "visible": false },
+          "meshType": "cylinder",
+          "color": "#f5a623"
+        }
+      ],
+      "successEvent": {
+        "type": "UNLOCK_COMPARTMENT",
+        "target": "wall_panel_01"
+      }
+    }
+  },
+  {
   taskId: "AKHE_DESIGNER_PUZZLE",
   title: "解构：神秘设计师",
   description: "调查Kiera名片背后的神秘符号，追寻一位身份不明的设计师的线索。该任务需要整理破碎的数据库记录，拼凑出设计师的真实身份。",
@@ -162,7 +206,11 @@ tasks.push({
       }
     ]
   }
-});
+}
+];
+
+// --- 逻辑拼图任务: AKHE ---
+tasks.push();
 
 // Function to get task details by ID
 export function getTaskById(taskId) {

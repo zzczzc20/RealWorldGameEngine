@@ -126,11 +126,11 @@ export function publish(eventName, data, sourceEvent = null) {
         // Log each engine being notified
         console.log(`[EventService] --> Notifying engine '${scriptId}' with event '${eventName}'.`);
         if (!engine.isFinished()) {
-          // Prevent specific internal events from being re-processed by the script engine itself,
-          // especially if the engine is currently on a step that might react to or re-trigger them.
-          if (eventName === 'SYNC_DATA_TO_BACKEND' || eventName === 'DATA_SYNC_COMPLETE' || eventName === 'requestWorldStateUpdate') {
-            console.log(`[EventService] Skipping notification of engine '${scriptId}' for internal/feedback event '${eventName}'.`);
-          } else {
+          // The following block is the source of the bug. It incorrectly skips critical state updates.
+          // It is being removed to allow 'requestWorldStateUpdate' to be processed.
+          // if (eventName === 'SYNC_DATA_TO_BACKEND' || eventName === 'DATA_SYNC_COMPLETE' || eventName === 'requestWorldStateUpdate') {
+          //   console.log(`[EventService] Skipping notification of engine '${scriptId}' for internal/feedback event '${eventName}'.`);
+          // } else {
             const stepBeforeNotify = engine.getCurrentStep();
             const stepIdBeforeNotify = stepBeforeNotify?.stepId;
             console.log(`[EventService] Engine '${scriptId}' current step before notify: ${stepIdBeforeNotify}`);
@@ -160,7 +160,7 @@ export function publish(eventName, data, sourceEvent = null) {
                 console.warn(`Script '${scriptId}' step changed from ${stepIdBeforeNotify} but new step is null/invalid after event '${eventName}'.`);
             }
           }
-        } // End of the 'else' for the eventName check
+        // } // End of the 'else' for the eventName check
         } else {
            console.log(`[EventService] Engine '${scriptId}' is finished, removing.`);
            activeEngines.delete(scriptId);

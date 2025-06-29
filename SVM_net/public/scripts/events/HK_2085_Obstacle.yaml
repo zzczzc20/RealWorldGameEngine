@@ -203,6 +203,14 @@ steps:
     type: dialogue
     persona: "AhMing"
     text: "（看到主角，焦急地喊道）強哥！你看看！我們常年進貨的那幾家藥材行，今天突然集體斷供！說什麼我們的信譽有問題！這不是明擺著要逼死我們嗎！"
+    nextStep: 215_X
+
+  - stepId: 215_X
+    type: updateWorldState
+    target: persona
+    id: "AhMing_Grandma"
+    property: requiresChatWindow
+    value: true
     nextStep: 216
 
   - stepId: 216
@@ -228,6 +236,14 @@ steps:
     type: dialogue
     persona: "Protagonist_Internal"
     text: "也許…Kiera能提供答案。她既然給了我這個符號，就一定知道些什麼。我必須聯繫她。"
+    nextStep: 220_X
+
+  - stepId: 220_X
+    type: updateWorldState
+    target: persona
+    id: "Kiera"
+    property: requiresChatWindow
+    value: true
     nextStep: 221
 
   - stepId: 221
@@ -288,7 +304,7 @@ steps:
     nextStep: 227
 
   - stepId: 227
-    type: ACTIVATE_PUZZLE
+    type: UNLOCK_TASK
     puzzleId: "KGF_Blueprint_Puzzle" # 激活新謎題
     nextStep: 227_1
     
@@ -305,7 +321,7 @@ steps:
     nextStep: 228
 
   - stepId: 228
-    type: WAIT_FOR_PUZZLE_SOLVED
+    type: WAIT_FOR_TASK_COMPLETED
     puzzleId: "KGF_Blueprint_Puzzle"
     nextStep: 229
     stepIdOnWait: 228_1

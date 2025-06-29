@@ -11,8 +11,11 @@ function TaskListView({ onAcceptTask, onExecuteTask, activeTask }) {
   const [taskStatus, setTaskStatus] = useState({}); // Local status for accepting animation/feedback
 
   // 调试信息
-  console.log('[TaskListView] unlockedTasks:', unlockedTasks);
-  console.log('[TaskListView] all tasks:', tasks.map(t => ({ id: t.taskId, initiallyVisible: t.initiallyVisible })));
+  console.log(`%c[TaskListView] RENDER START`, 'color: #22d3ee; font-weight: bold;');
+  console.log(`[TaskListView] Received unlockedTasks prop:`, JSON.stringify(unlockedTasks));
+  const visibleTasks = tasks.filter(task => unlockedTasks.includes(task.taskId));
+  console.log(`[TaskListView] Filtered visible tasks (count: ${visibleTasks.length}):`, JSON.stringify(visibleTasks.map(t => t.taskId)));
+  console.log(`%c[TaskListView] RENDER END`, 'color: #22d3ee; font-weight: bold;');
 
   // Keep handleAcceptTask for non-CODE_ENTRY tasks offered via this view (if any)
   const handleAcceptClick = (task) => {

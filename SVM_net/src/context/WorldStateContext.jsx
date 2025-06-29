@@ -388,12 +388,16 @@ export function WorldStateProvider({ children }) {
           }
           case 'tasks':
             if (action === 'unlock' && payload && payload.taskId) {
-              const taskIdToUnlock = payload.taskId;
-              const alreadyUnlocked = prev.unlockedTasks.includes(taskIdToUnlock);
-              if (!alreadyUnlocked) {
-                newState.unlockedTasks = [...prev.unlockedTasks, taskIdToUnlock];
-                eventToPublish = { name: 'task_unlocked', data: { taskId: taskIdToUnlock } };
-                console.log(`[WorldStateContext] Task '${taskIdToUnlock}' unlocked.`);
+              const { taskId } = payload;
+              if (taskId && !prev.unlockedTasks.includes(taskId)) {
+                console.log('[WSC/unlock] Received unlock request for taskId:', taskId);
+                console.log('[WSC/unlock] Unlocked tasks BEFORE update:', JSON.stringify(prev.unlockedTasks));
+                newState.unlockedTasks = [...prev.unlockedTasks, taskId];
+                console.log('[WSC/unlock] Unlocked tasks AFTER update:', JSON.stringify(newState.unlockedTasks));
+                eventToPublish = { name: 'task_unlocked', data: { taskId } };
+                console.log(`[WSC/unlock] SUCCESS: Task '${taskId}' unlocking. Event '${eventToPublish.name}' will be published.`);
+              } else {
+                console.warn(`[WSC/unlock] SKIPPED: Task '${taskId}' is already in unlockedTasks array.`, prev.unlockedTasks);
               }
             } else if (action === 'complete' && payload && payload.taskId) {
               const taskIdToComplete = payload.taskId;

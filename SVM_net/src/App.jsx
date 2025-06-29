@@ -23,6 +23,7 @@ import RiftTunerDemo from './components/RiftTunerDemo';
 import RiftTunerGame from './components/RiftTunerGame';
 import VisualNovelView from './components/VisualNovelView';
 import LogicPuzzleGame from './components/LogicPuzzleGame';
+import BlueprintPuzzleGame from './components/BlueprintPuzzleGame';
 
 function AppContent() {
   const [apiProvider, setApiProvider] = useState(null); // Added
@@ -142,7 +143,7 @@ function AppContent() {
   const handleAcceptTask = (task) => setActiveTask(task);
   const handleExecuteTask = (taskId) => {
       const taskDetails = getTaskById(taskId);
-      if (taskDetails && (taskDetails.type === 'CODE_ENTRY' || taskDetails.type === 'RIFT_TUNER' || taskDetails.type === 'LOGIC_PUZZLE')) {
+      if (taskDetails && (taskDetails.type === 'CODE_ENTRY' || taskDetails.type === 'RIFT_TUNER' || taskDetails.type === 'LOGIC_PUZZLE' || taskDetails.type === 'BLUEPRINT_PUZZLE')) {
           setExecutingTaskId(taskId);
       }
   };
@@ -326,6 +327,17 @@ function AppContent() {
                                 console.log('Logic Puzzle Failed:', result);
                                 // For now, failure allows retry within the component, so we might not need a global handler here.
                                 // If we wanted failure to close the window, we would call handleCodeEntryClose() here.
+                            }}
+                        />
+                    );
+                } else if (taskDetails && taskDetails.type === 'BLUEPRINT_PUZZLE') {
+                    codeEntryPanel = (
+                        <BlueprintPuzzleGame
+                            taskDetails={taskDetails}
+                            onSolve={(result) => {
+                                console.log('[App.jsx] Blueprint Puzzle Solved:', result);
+                                worldStateContext.completeTask(taskDetails.taskId, result);
+                                handleCodeEntryClose();
                             }}
                         />
                     );
