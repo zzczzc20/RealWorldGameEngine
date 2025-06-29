@@ -69,6 +69,14 @@ steps:
     type: dialogue
     persona: "Protagonist_Internal"
     text: "回到我那狹小的房間，我嘗試用終端掃描那個符號，在公共網絡上進行圖像搜索。結果…一無所獲。它就像一個不存在於這個時代的印記，乾淨得令人不安。"
+    nextStep: 205_X
+
+  - stepId: 205_X
+    type: updateWorldState
+    target: persona
+    id: "Echo"
+    property: requiresChatWindow
+    value: true
     nextStep: 206
 
   - stepId: 206
@@ -78,10 +86,9 @@ steps:
     nextStep: 207
 
   - stepId: 207
-    type: aiDialogue
-    prompt: "我思考著'回聲'的話。'文字被遺忘的墳場'…是指圖書館？還是…檔案館？我想起來，在城市重建的浪潮中，有一個'亞洲文獻與設計資料中心'被保留了下來，收藏著大量舊時代的資料。也許，我該去那裏看看。"
+    type: dialogue
+    text: "我思考著'回聲'的話。'文字被遺忘的墳場'…是指圖書館？還是…檔案館？我想起來，在城市重建的浪潮中，有一個'亞洲文獻與設計資料中心'被保留了下來，收藏著大量舊時代的資料。也許，我該去那裏看看。"
     persona: "Protagonist_Internal"
-    waitFor: dialogueClosed
     nextStep: 207_1
 
   - stepId: 207_1
@@ -148,13 +155,6 @@ steps:
     persona: "Narrator"
     owner: "Protagonist_Internal"
     text: "終端的資料庫很龐大，但許多內容都已損壞或被加密。我必須從這些殘缺的碎片中，找到與符號相關的設計師或流派。"
-    # 謎題描述：symbolArchivePuzzle
-    # 類型：多階段信息拼湊與邏輯推理。
-    # 界面：一個模擬的舊式資料庫界面。左邊是Kiera名片上的符號，右邊是搜索結果，顯示多個殘缺的文檔條目。
-    # 階段一：玩家需要點擊不同的文檔碎片，閱讀關於不同設計流派的描述。大部分是無關的，但有幾個提到了“反諷美學”、“異質空間”、“對主流秩序的冷峻戲仿”。
-    # 階段二：將這些相關的描述拖拽到一個“線索板”上，會觸發關鍵詞高亮，如“反諷”、“疏離”、“K”。
-    # 階段三：使用這些關鍵詞進行高級搜索，會得到一份幾乎完全損毀的設計師檔案，標題只剩下“__G_”和“__F__”。檔案中有一句清晰可見的話：“我的設計，是獻給這個荒誕世界最真誠的玩笑。”
-    # 解決方案：玩家需要在輸入框中，根據線索組合出設計師的名字 "KGF"。
     nextStep: 211
 
   - stepId: 211
