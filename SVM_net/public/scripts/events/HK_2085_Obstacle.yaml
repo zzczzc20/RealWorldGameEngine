@@ -325,6 +325,7 @@ steps:
   - stepId: 226_1
     type: dialogue
     persona: "Protagonist_Internal"
+    image: /assets/images/dream.png 
     text: "她的話讓我感到一陣寒意。夢境、火焰、失控的人群…這和我的夢境何其相似。她的'實驗性直播'，難道就是…？我看向房間中央那個巨大的建築藍圖，它似乎是一個互動裝置。"
     nextStep: 227
 
@@ -412,7 +413,7 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    text: "密碼正確。檔案庫解鎖。但裏面的內容…並不是設計圖或哲學筆記。而是一段段加密的音頻日誌。"
+    text: "密碼正確。檔案庫解鎖。但裏面的內容…並不是設計圖或哲學筆記。而是一段段加密的音頻日誌。我戴上耳機..."
     nextStep: 233
 
   - stepId: 233
@@ -439,14 +440,6 @@ steps:
     prompt: "我震驚地聽著這些錄音。這聲音…無疑是Kiera的，但語氣和內容卻像完全變了一個人。充滿了偏執的激情和危險的思想。'管道'？'方舟'？這都是什麼？'父親的壓迫'？是指KF嗎？'祖父的理念'？她想繼承AKHE的什麼？'火焰'…'淨化'…難道她正在策劃某種可怕的恐怖襲擊或大型破壞活動？她光鮮的網紅外表下，竟然隱藏著這樣黑暗的一面？"
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
-    nextStep: 236_1
-
-  - stepId: 236_1
-    type: updateWorldState
-    target: persona
-    id: "KF_Lawyer"
-    property: requiresChatWindow
-    value: true
     nextStep: 237
 
   - stepId: 237 # 章節高潮
@@ -468,7 +461,7 @@ steps:
     persona: "KF_Lawyer"
     owner: "AhMing"
     characters:
-      - id: KF_Lawyer # TODO: 需要KF律師的立繪，西裝革履，表情冷漠，戴著金絲眼鏡。
+      - id: KF_Lawyer
         sprite: /assets/images/lawyer_sprite.png
         position: right
     text: "（電話背景音傳來一個冷漠的聲音）這位先生，請保持冷靜。我們是依法辦事。這片區域，包括這家店鋪，都屬於'工廠社區遺址活化項目'的一部分。拒不配合，我們將採取強制措施。" # KF勢力正式登場，並扭曲歷史為己用。
