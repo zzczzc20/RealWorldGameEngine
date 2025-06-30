@@ -81,7 +81,65 @@ steps:
     type: dialogue
     persona: "AhMing"
     text: "【阿明被成功鼓励】（他抬起头，眼中虽然依旧疲惫，但似乎有了一丝微光）……谢谢你，强哥。也许…也许我们还没到山穷水尽的地步。你说得对，我们得先离开这里，再想别的。"
+    nextStep: 203_X
+
+
+
+  - stepId: 203_X
+    type: dialogue
+    persona: "Protagonist_Internal"
+    image: /assets/images/pink_dream.png
+    text: "回到家里，我闭上了眼睛，进入到了半梦半醒的状态...这时我好想做了一个梦...梦里出现了一个人" # 主角決定將註意力轉向Kiera的線索。
+    nextStep: kiera_x1
+
+  - stepId: kiera_x1
+    type: dialogue
+    persona: "Protagonist_Internal"
+    image: /assets/images/pink_dream.png
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_sit.png
+        position: center
+    text: "Kiera...嘻嘻......Kiera...嘻嘻嘻嘻..." # 主角決定將註意力轉向Kiera的線索。
+    nextStep: kiera_x1.5
+
+  - stepId: kiera_x1.5
+    type: dialogue
+    persona: "Protagonist_Internal"
+    image: /assets/images/pink_dream.png
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_sit.png
+        position: center
+    text: "嘻...嘻嘻嘻..." # 主角決定將註意力轉向Kiera的線索。
+    nextStep: kiera_x2
+
+  - stepId: kiera_x2
+    type: dialogue
+    persona: "Protagonist_Internal"
+    image: /assets/images/pink_dream.png
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_sit.png
+        position: center
+    text: "这时你感觉Kiera在和你说话..." # 主角決定將註意力轉向Kiera的線索。
+    nextStep: kiera_xk
+
+  - stepId: kiera_xk
+    type: updateWorldState
+    target: persona
+    id: "Kiera"
+    property: requiresChatWindow
+    value: true
+    nextStep: kiera_x3
+  
+  - stepId: kiera_x3
+    type: aiDialogue
+    persona: "Player"
+    owner: "Kiera"
+    prompt: "Kiera, Kiera小姐你好...我是上次给你调昨日回响的那位..."
     nextStep: 203
+
 
   - stepId: 203
     type: dialogue
