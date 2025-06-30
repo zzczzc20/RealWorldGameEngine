@@ -51,6 +51,36 @@ steps:
         effect: { type: 'slideInLeft', duration: 1.0 }
     owner: "AhMing"
     text: "（看著失魂落魄的阿明，你不知如何安慰。'不要滋養無根的野草'…'回聲'的話語讓你感到一陣寒意。你拿出Kiera給的那張帶有奇特符號的名片。）阿明，先別想了。我們得先離開這裏。我…我還有點事要做。"
+    nextStep: 202_ai_dialogue
+
+  - stepId: 202_ai_dialogue
+    type: aiDialogue
+    persona: "Protagonist_Internal"
+    owner: "AhMing"
+    prompt: "看着阿明颓丧的样子，我觉得我应该说些什么来鼓励他。但言语是那么苍白，我该怎么组织语言，才能真正给他一点力量，而不是空洞的安慰？"
+    nextStep: 202_branch
+
+  - stepId: 202_branch
+    type: branch
+    condition:
+      target: personas
+      id: AhMing
+      property: favorability
+      operator: '>='
+      value: 75
+    nextStepOnTrue: 202_success
+    nextStepOnFalse: 202_fail
+
+  - stepId: 202_fail
+    type: dialogue
+    persona: "AhMing"
+    text: "【阿明没有被成功鼓励，请再次尝试！】（摇了摇头，没有看你）……强哥，你别说了，让我一个人静一静。你根本不懂。"
+    nextStep: 202_ai_dialogue
+
+  - stepId: 202_success
+    type: dialogue
+    persona: "AhMing"
+    text: "【阿明被成功鼓励】（他抬起头，眼中虽然依旧疲惫，但似乎有了一丝微光）……谢谢你，强哥。也许…也许我们还没到山穷水尽的地步。你说得对，我们得先离开这里，再想别的。"
     nextStep: 203
 
   - stepId: 203
@@ -172,7 +202,7 @@ steps:
   - stepId: 212_1
     type: dialogue
     persona: "Librarian"
-    text: "（看到我解開了謎題，管理員點了點頭）想起來了，AKHE。一個天才，也是一個悲劇。他的理念太危險，不容於他的兒子——現在的KF集團掌門人。他最後的作品，一個叫'工廠社區'的實驗項目，就在觀塘那邊，現在應該已經是廢墟了吧。說起來，他家裏的悲劇也不少，我記得他有個兒媳，也是個很有才華的設計師，後來…唉，也是一言難盡。" # 暗示KM/Sera的存在和悲劇，並點出涼茶鋪所在地的起源。
+    text: "（看到我解開了謎題，管理員點了點頭）想起來了，AKHE。一個物流领域的天才，也是一個悲劇。他的理念太危險。他最後的作品，一個叫'海'的實驗項目，就在觀塘那邊，現在應該已經是廢墟了吧。說起來，他家裏的悲劇也不少，我記得他有個兒媳，也是個很有才華的設計師，後來…唉，也是一言難盡。" # 暗示KM/Sera的存在和悲劇，並點出涼茶鋪所在地的起源。
     nextStep: 214
 
   - stepId: 213 # 等待謎題解決時的循環提示
@@ -195,7 +225,7 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    text: "帶著AKHE這個沉重的名字和'工廠社區'的線索，我離開了資料中心。一種預感讓我先繞回了唐樓。還沒到街角，就聽到涼茶鋪那邊傳來爭吵聲。"
+    text: "帶著AKHE這個沉重的名字和'海'的線索，我有所思考。正在此時，我收到阿明嘅電話"
     image: /assets/images/tea_store.png
     nextStep: 215_1
 

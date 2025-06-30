@@ -173,6 +173,7 @@ export function WorldStateProvider({ children }) {
   
   const [state, setState] = useState(loadInitialState());
   const { svms, activeTask, player, personas, chatHistories, discoveredClues, currentPuzzleState, hasUnreadClues, hasUnreadPuzzles, unlockedTasks, completedTasks } = state;
+  const worldStateRef = useRef(state); // Create a ref to hold the state
   const previousInventoryRef = useRef(player.inventory);
   
   const publishEvent = useCallback((eventName, eventData) => {
@@ -185,6 +186,7 @@ export function WorldStateProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    worldStateRef.current = state; // Always keep the ref up to date
     const stateToSave = { ...state };
     delete stateToSave._pendingEvent;
     delete stateToSave._postStateUpdateActions;
@@ -775,9 +777,7 @@ export function WorldStateProvider({ children }) {
     }
   }, [state, updatePuzzleState, publishEvent]);
 
-  const getWorldState = useCallback(() => ({
-    svms, activeTask, player, discoveredClues, currentPuzzleState, hasUnreadClues, hasUnreadPuzzles, unlockedTasks, completedTasks
-  }), [svms, activeTask, player, discoveredClues, currentPuzzleState, hasUnreadClues, hasUnreadPuzzles, unlockedTasks, completedTasks]);
+  const getWorldState = useCallback(() => worldStateRef.current, []);
 
   const markCluesAsRead = useCallback(() => {
     setState(prev => ({ ...prev, hasUnreadClues: false }));

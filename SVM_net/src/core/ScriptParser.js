@@ -317,6 +317,7 @@ export default class ScriptParser {
              audio: step.audio || null // 包含音频字段
            }, eventName);
          } else if (eventName === 'dialogueClosed') {
+           // No longer need a timeout. The branch condition will now fetch the latest state.
            next = step.next;
          }
          break;
@@ -712,6 +713,10 @@ export default class ScriptParser {
 
   // Modified to accept specific data source for evaluation
   _evaluateConditionClause(clause, worldState, dataForCondition = null) {
+    // ALWAYS fetch the latest world state to prevent race conditions where a condition
+    // is checked in the same event loop turn that a state-updating event was fired.
+    worldState = this.getWorldState();
+
     // Use dataForCondition instead of eventData directly passed to notify
     const eventData = dataForCondition; // Rename for clarity within this function
 
