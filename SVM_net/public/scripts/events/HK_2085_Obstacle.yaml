@@ -20,7 +20,7 @@ steps:
     audio: /assets/audio/city_rumble_low.mp3
     characters:
       - id: AhMing # 可以同时显示多个角色
-        sprite: /assets/images/Ahming_sprite.png
+        sprite: /assets/images/AhMing_sad.png
         position: center
         effect: { type: 'slideInLeft', duration: 1.0 }
     text: "倉庫的黑暗像一塊濕冷的布，包裹著你和阿明的沉默。派飯行動的失敗，像一記悶棍，敲碎了阿明最後一點光。而你口袋裏終端上'回聲'那冰冷的詞句，則在你的腦海中反復迴響。"
@@ -33,7 +33,7 @@ steps:
     audio: /assets/audio/city_rumble_low.mp3
     characters:
       - id: AhMing # 可以同时显示多个角色
-        sprite: /assets/images/Ahming_sprite.png
+        sprite: /assets/images/AhMing_sad.png
         position: center
         effect: { type: 'slideInLeft', duration: 1.0 }
     text: "（聲音沙啞，充滿失敗感）…都沒了。什麼都做不了…強哥，也許你說得對，也許我爸當年…也是這樣無力，所以才消失的吧…" # 阿明將失敗與父親的失蹤聯繫起來，更顯絕望。
@@ -46,7 +46,7 @@ steps:
     audio: /assets/audio/city_rumble_low.mp3
     characters:
       - id: AhMing # 可以同时显示多个角色
-        sprite: /assets/images/Ahming_sprite.png
+        sprite: /assets/images/AhMing_sad.png
         position: center
         effect: { type: 'slideInLeft', duration: 1.0 }
     owner: "AhMing"
