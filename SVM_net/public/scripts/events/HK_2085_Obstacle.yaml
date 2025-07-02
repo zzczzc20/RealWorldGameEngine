@@ -255,12 +255,22 @@ steps:
     type: dialogue
     persona: "Protagonist_Internal"
     text: "AKHE…就是這個名字。資料顯示他是一位活躍於21世紀中葉的建築設計師，以極度超前和怪誕的風格聞名，但在主流視野中被刻意遺忘。這個符號，是他的個人簽名。"
+    image: /assets/images/archive_interior.png
+    characters:
+      - id: Librarian
+        sprite: /assets/images/librarian_sprite.png
+        position: left
     nextStep: 212_1
 
   - stepId: 212_1
     type: dialogue
     persona: "Librarian"
     text: "（看到我解開了謎題，管理員點了點頭）想起來了，AKHE。一個物流领域的天才，也是一個悲劇。他的理念太危險。他最後的作品，一個叫'海'的實驗項目，就在觀塘那邊，現在應該已經是廢墟了吧。說起來，他家裏的悲劇也不少，我記得他有個兒媳，也是個很有才華的設計師，後來…唉，也是一言難盡。" # 暗示KM/Sera的存在和悲劇，並點出涼茶鋪所在地的起源。
+    image: /assets/images/archive_interior.png
+    characters:
+      - id: Librarian
+        sprite: /assets/images/librarian_sprite.png
+        position: left
     nextStep: 214
 
   - stepId: 213 # 等待謎題解決時的循環提示
@@ -566,7 +576,7 @@ steps:
   - stepId: 228_1
     type: dialogue
     persona: "Echo"
-    text: "真理藏於反面。秩序生於混沌。" # Echo的提示
+    text: "真理藏於反面。秩序生於混沌。【请去谜题系统查看】" # Echo的提示
     nextStep: 228
 
   - stepId: 229
@@ -609,7 +619,7 @@ steps:
   - stepId: 231_1 # 等待謎題解決時的循環提示
     type: dialogue
     persona: "Echo"
-    text: "當演員消失，觀眾消失，只剩下行為本身。那是什麼？" # Echo的提示，指向行為的本質。
+    text: "當演員消失，觀眾消失，只剩下行為本身。那是什麼？【请去谜题系统查看】" # Echo的提示，指向行為的本質。
     nextStep: 231
     
   - stepId: 232 # 謎題解決，核心詭計內容出現
@@ -626,14 +636,16 @@ steps:
 
   - stepId: 234 # 播放被誤解的音頻日誌片段
     type: dialogue
-    persona: "KM_Audio" # 一個新的persona，聲音聽起來像年輕女性，充滿激情和偏執
+    persona: "Narrator"
+    owner: "Protagonist_Internal" # 一個新的persona，聲音聽起來像年輕女性，充滿激情和偏執
     audio: /assets/audio/km_log_1.mp3 # TODO: 需要音頻，女聲，語氣狂熱而充滿煽動性。
     text: "（音頻1）…這不是娛樂，這是一場演出！一場喚醒所有沉睡者的演出！那些被遺棄在'管道'裏的人，將成為第一批觀眾，也是第一批演員！" # 提及“管道”，與Sera補充說明對應。
     nextStep: 235
 
   - stepId: 235
     type: dialogue
-    persona: "KM_Audio"
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
     audio: /assets/audio/km_log_2.mp3 # TODO: 需要音頻，女聲，語氣變得冰冷而堅定，充滿使命感。
     text: "（音頻2）…父親的壓迫，和他那庸俗的秩序，必須被打破。祖父的理念將由我來實現！我們將建造'方舟'，帶領信徒離開這片虛偽的土地！那些無法理解的，將在火焰中得到淨化！" # 提及“方舟(舟)”和“淨化”，與Sera補充說明對應。
     nextStep: 236
@@ -681,15 +693,12 @@ steps:
     persona: "Narrator"
     owner: "Protagonist_Internal"
     text: "一邊是倒下的婆婆和阿明絕望的哭喊，一邊是通往我身世之謎的唯一線索。'回聲'的指令前所未有地清晰和急迫，而KF地產的出現，讓所有苦難都有了具體的源頭。我站在了命運的十字路口，時間仿佛在此刻凝固。"
-    nextStep: 241
-
-  - stepId: 241 # 最終抉擇
-    type: choices
     choices:
       - text: "不顧一切，立刻趕回涼茶鋪。"
         nextStep: 300 # 假設第三章的開頭ID，代表選擇倫理
       - text: "聽從'回聲'，繼續追查'Kiera'的秘密。"
         nextStep: 301 # 假設第三章的另一個開頭ID，代表選擇真相
+    nextStep: 300
     
   - stepId: 300
     type: dialogue
