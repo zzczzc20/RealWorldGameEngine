@@ -87,24 +87,32 @@ export async function getOpenRouterCompletion(apiKey, userMessage, history = [])
  * @returns {Promise<string>} - A promise that resolves with the assistant's message content.
  * @throws {Error} - Throws an error if the API call fails.
  */
-export async function getDeepSeekCompletion(apiKey, userMessage, history = []) {
+export async function getDeepSeekCompletion(apiKey, originalMessages = []) {
   if (!apiKey) {
     throw new Error("DeepSeek API Key is required.");
   }
-  if (!userMessage) {
-    throw new Error("User message cannot be empty.");
+  if (!originalMessages || originalMessages.length === 0) {
+    throw new Error("Messages array cannot be empty.");
   }
 
+  // Defensively map roles to ensure API compatibility.
+  // The API only accepts 'user', 'assistant', and 'system'.
+  // Any other role (e.g., our internal persona IDs like 'AhMing') must be mapped to 'assistant'.
+  const messages = originalMessages.map(msg => ({
+    ...msg,
+    role: (msg.role === 'user' || msg.role === 'system') ? msg.role : 'assistant',
+  }));
+
   // Mask the API key for logging (show only first few and last few characters)
-  const maskedApiKey = apiKey.length > 10 
-    ? `${apiKey.substring(0, 5)}...${apiKey.substring(apiKey.length - 5)}` 
+  const maskedApiKey = apiKey.length > 10
+    ? `${apiKey.substring(0, 5)}...${apiKey.substring(apiKey.length - 5)}`
     : 'KEY_TOO_SHORT';
   
   console.log("DeepSeek API Request Details:");
   console.log("Base URL: https://api.deepseek.com");
   console.log("API Key (masked):", maskedApiKey);
   console.log("Model: deepseek-chat");
-  console.log("Messages:", history.length > 0 ? history : [{ role: "user", content: userMessage }]);
+  console.log("Full message history being sent to DeepSeek:", JSON.stringify(messages, null, 2));
 
   const openai = new OpenAI({
     baseURL: 'https://api.deepseek.com',
@@ -113,10 +121,10 @@ export async function getDeepSeekCompletion(apiKey, userMessage, history = []) {
   });
 
   try {
-    const messages = history.length > 0 ? history : [{ role: "user", content: userMessage }];
     const completion = await openai.chat.completions.create({
-      messages: messages,
+      messages, // Pass the sanitized messages array
       model: "deepseek-chat",
+      temperature: 0.7, // Set temperature to encourage less repetitive responses
     });
 
     if (completion.choices && completion.choices.length > 0 && completion.choices[0].message?.content) {
@@ -274,18 +282,16 @@ export async function getAICompletion(provider, apiKey, messages, tools) {
     // Note: The new getGrokCompletion expects 'messages' array directly.
     return await getGrokCompletion(apiKey, messages, tools);
   }
-  
-  // Fallback to old logic for other providers for now
-  const history = messages.slice(0, -1);
-  const userMessage = messages[messages.length - 1]?.content || "";
-
+  // Pass the full 'messages' array to the appropriate provider function.
   let completionContent;
   if (provider === 'openrouter') {
-    completionContent = await getOpenRouterCompletion(apiKey, userMessage, history);
+    throw new Error("OpenRouter completion is not yet updated to the new message format.");
+    // completionContent = await getOpenRouterCompletion(apiKey, messages);
   } else if (provider === 'deepseek') {
-    completionContent = await getDeepSeekCompletion(apiKey, userMessage, history);
+    completionContent = await getDeepSeekCompletion(apiKey, messages);
   } else if (provider === 'sambanova') {
-    completionContent = await getSambaNovaCompletion(apiKey, userMessage, history);
+    throw new Error("SambaNova completion is not yet updated to the new message format.");
+    // completionContent = await getSambaNovaCompletion(apiKey, messages);
   } else {
     throw new Error("Invalid API provider specified. Use 'openrouter', 'deepseek', 'sambanova', or 'grok'.");
   }
@@ -330,13 +336,18 @@ export async function getAIDialogueCompletion(provider, apiKey, prompt, persona 
   ];
 
   try {
-    const messagesForAPI = [...messages];
-    // For non-grok providers, getAICompletion expects a user message at the end.
-    if (messagesForAPI.length === 0 || messagesForAPI[messagesForAPI.length - 1].role !== 'user') {
+    const messagesForAPI = messages.map(msg => ({
+      // Ensure all non-user roles are mapped to 'assistant' for the API.
+      role: msg.role === 'user' ? 'user' : 'assistant',
+      content: msg.content
+    }));
+
+    // Add a final 'user' message with "Proceed." if the last message is not from the user,
+    // as some models expect this format.
+    if (messagesForAPI.length > 0 && messagesForAPI[messagesForAPI.length - 1].role !== 'user') {
       messagesForAPI.push({ role: "user", content: "Proceed." });
     }
 
-    // Use the existing completion function with corrected arguments
     const completion = await getAICompletion(provider, apiKey, messagesForAPI);
     return completion.message.content;
   } catch (error) {

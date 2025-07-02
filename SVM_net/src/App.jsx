@@ -27,7 +27,7 @@ import LogicPuzzleGame from './components/LogicPuzzleGame';
 function AppContent() {
   const [apiProvider, setApiProvider] = useState(null); // Added
   const [apiKey, setApiKey] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [currentView, setCurrentView] = useState('map');
   const [currentBgm, setCurrentBgm] = useState(null);
   const [selectedSvmId, setSelectedSvmId] = useState(null);

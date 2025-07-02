@@ -43,6 +43,7 @@ useEffect(() => {
     setIsLoading(true);
 
     const userMessage = { role: 'user', content: message };
+    const newHistory = [...chatHistory, userMessage];
     updateChatHistory(userMessage);
     publish('userInputUpdated', { input: message, persona: persona.id });
     setMessage('');
@@ -84,17 +85,17 @@ useEffect(() => {
 
       const systemMessage = { role: 'system', content: systemPromptContent };
       
-      const historyForLLM = chatHistory
-        .filter(msg => msg.role !== 'system' && msg.role !== 'tool')
-        .map(msg => ({
-          role: (msg.role === 'user' || msg.role !== persona.id) ? 'user' : 'assistant',
-          content: msg.content
-        }));
-
-      let messages = [systemMessage, ...historyForLLM, userMessage];
+      // The `newHistory` variable contains a complete, up-to-date history including the latest user message.
+      // We construct the message list for the API from this, starting with the system prompt.
+      // Role mapping is now handled by AIService.js, so we pass the messages as-is.
+      const messages = [
+        systemMessage,
+        ...newHistory.filter(msg => msg.role !== 'system' && msg.role !== 'tool')
+      ];
 
       // Loop to handle potential tool calls
       for (let i = 0; i < 5; i++) { // Limit iterations to prevent infinite loops
+        // Pass the complete and up-to-date `messages` array to the AI service.
         const completion = await getAICompletion(apiProvider, apiKey, messages, tools);
         const choice = completion.message;
 
