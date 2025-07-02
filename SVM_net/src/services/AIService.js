@@ -14,13 +14,19 @@ import OpenAI from "openai";
  * @returns {Promise<string>} - A promise that resolves with the assistant's message content.
  * @throws {Error} - Throws an error if the API call fails.
  */
-export async function getOpenRouterCompletion(apiKey, userMessage, history = []) {
+export async function getOpenRouterCompletion(apiKey, originalMessages = []) {
   if (!apiKey) {
     throw new Error("OpenRouter API Key is required.");
   }
-  if (!userMessage) {
-    throw new Error("User message cannot be empty.");
+  if (!originalMessages || originalMessages.length === 0) {
+    throw new Error("Messages array cannot be empty.");
   }
+
+  // Defensively map roles to ensure API compatibility.
+  const messages = originalMessages.map(msg => ({
+    ...msg,
+    role: (msg.role === 'user' || msg.role === 'system') ? msg.role : 'assistant',
+  }));
 
   const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
   // Recommended model (check OpenRouter for availability and pricing)
@@ -39,10 +45,10 @@ export async function getOpenRouterCompletion(apiKey, userMessage, history = [])
       },
       body: JSON.stringify({
         model: model,
-        messages: [...history, { role: "user", content: userMessage }]
+        messages: messages
         // Optional parameters (temperature, max_tokens, etc.) can be added here
-        // "temperature": 0.7, 
-        // "max_tokens": 150, 
+        // "temperature": 0.7,
+        // "max_tokens": 150,
       })
     });
 
@@ -149,13 +155,19 @@ export async function getDeepSeekCompletion(apiKey, originalMessages = []) {
  * @returns {Promise<string>} - A promise that resolves with the assistant's message content.
  * @throws {Error} - Throws an error if the API call fails.
  */
-export async function getSambaNovaCompletion(apiKey, userMessage, history = []) {
+export async function getSambaNovaCompletion(apiKey, originalMessages = []) {
   if (!apiKey) {
     throw new Error("SambaNova API Key is required.");
   }
-  if (!userMessage && (!history || history.length === 0)) { // Allow empty userMessage if history is present
+  if (!originalMessages || originalMessages.length === 0) {
     throw new Error("User message cannot be empty if history is not provided.");
   }
+
+  // Defensively map roles to ensure API compatibility.
+  const messagesForAPI = originalMessages.map(msg => ({
+    ...msg,
+    role: (msg.role === 'user' || msg.role === 'system') ? msg.role : 'assistant',
+  }));
 
   const maskedApiKey = apiKey.length > 8 ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : 'KEY_TOO_SHORT';
   console.log("SambaNova API Request Details:");
@@ -163,11 +175,6 @@ export async function getSambaNovaCompletion(apiKey, userMessage, history = []) 
   console.log("API Key (masked):", maskedApiKey);
   const model = "Llama-4-Maverick-17B-128E-Instruct"; // As specified by user
   console.log("Model:", model);
-  
-  const messagesForAPI = history.length > 0 ? history : [{ role: "user", content: userMessage }];
-  if (history.length > 0 && userMessage) { // If history and userMessage both exist, add userMessage to history
-      messagesForAPI.push({role: "user", content: userMessage});
-  }
   console.log("Messages:", messagesForAPI);
 
 
@@ -285,13 +292,11 @@ export async function getAICompletion(provider, apiKey, messages, tools) {
   // Pass the full 'messages' array to the appropriate provider function.
   let completionContent;
   if (provider === 'openrouter') {
-    throw new Error("OpenRouter completion is not yet updated to the new message format.");
-    // completionContent = await getOpenRouterCompletion(apiKey, messages);
+    completionContent = await getOpenRouterCompletion(apiKey, messages);
   } else if (provider === 'deepseek') {
     completionContent = await getDeepSeekCompletion(apiKey, messages);
   } else if (provider === 'sambanova') {
-    throw new Error("SambaNova completion is not yet updated to the new message format.");
-    // completionContent = await getSambaNovaCompletion(apiKey, messages);
+    completionContent = await getSambaNovaCompletion(apiKey, messages);
   } else {
     throw new Error("Invalid API provider specified. Use 'openrouter', 'deepseek', 'sambanova', or 'grok'.");
   }
