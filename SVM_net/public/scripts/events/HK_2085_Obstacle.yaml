@@ -291,6 +291,66 @@ steps:
     type: dialogue
     persona: "AhMing"
     text: "（看到主角，焦急地喊道）強哥！你看看！我們常年進貨的那幾家藥材行，今天突然集體斷供！說什麼我們的信譽有問題！這不是明擺著要逼死我們嗎！"
+    nextStep: 215_A
+  - stepId: 215_A
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "掛斷電話，阿明聲音裏的恐慌像針一樣刺痛著我。我立刻動身，穿過熟悉的街道，向涼茶鋪跑去。還沒到門口，就看到阿明焦急地在店門外踱步，店裏的氣氛比以往任何時候都要凝重。"
+    image: /assets/images/tea_store.png
+    nextStep: 215_B
+
+  - stepId: 215_B
+    type: dialogue
+    persona: "Player"
+    owner: "AhMing"
+    text: "阿明！怎麼回事？電話裏沒說清楚。"
+    nextStep: 215_C
+
+  - stepId: 215_C
+    type: dialogue
+    persona: "AhMing"
+    text: "（看到我，阿明像抓住了救命稻草）強哥！你看看！不止一家，是所有我們常去的藥材行，今天集體斷供！理由千奇百怪，但意思都一樣，就是不賣給我們了！我外婆…我外婆剛剛差點就…就站不穩了。"
+    nextStep: 215_D
+
+  - stepId: 215_D
+    type: dialogue
+    persona: "AhMing_Grandma"
+    text: "（我走進店裏，看到阿婆無力地坐在椅子上，臉色蒼白。她看到我，勉強抬起頭，聲音微弱但固執）…這是要把我們往死路上逼啊…我早就想到了…斷了我們的根，這店…就真的完了。"
+    nextStep: 215_E
+
+  - stepId: 215_E
+    type: dialogue
+    persona: "Player"
+    owner: "AhMing_Grandma"
+    text: "阿婆，您先別急。就沒有別的進貨渠道了嗎？"
+    nextStep: 215_F
+
+  - stepId: 215_F
+    type: dialogue
+    persona: "AhMing_Grandma"
+    text: "渠道…倒是有一個…只是…那是一條早就被遺忘的死路了。*（她猶豫了很久，看了看門外，才壓低聲音說）* 我聽我過世的老伴提過，在這片舊區的地下，有一套廢棄了幾十年的…'管道'。很久以前，什麼東西都能通過它運，又快又隱蔽。現在，聽說還有一些走投無路的人，把它當成黑市用…但入口早就沒人知道了，就算知道，聽說也要特殊的'鑰匙'才能打開。"
+    nextStep: 215_G
+
+  - stepId: 215_G
+    type: aiDialogue
+    prompt: "我聽到'管道'兩個字，腦子裏轟的一聲。這不就是我在資料中心看到的，AKHE設計的那個物流系統嗎？阿婆說的'鑰匙'…難道和AKHE有關？而Kiera給我的那個符號，正是AKHE的簽名。這一切不可能只是巧合。拯救涼茶鋪的希望，竟然和我追尋的謎團連接在了一起。Kiera…她一定知道些什麼。"
+    persona: "Protagonist_Internal"
+    waitFor: dialogueClosed
+    nextStep: 215_H
+
+  - stepId: 215_H
+    type: dialogue
+    persona: "Player"
+    owner: "AhMing_Grandma"
+    text: "阿婆，阿明，這件事…請交給我試試看。我可能…有辦法找到那把'鑰匙'。你們先照顧好自己，不要和他們起正面衝突。" # 主角決定承擔起這個任務，並安撫二人。
+    nextStep: 215_I
+
+  - stepId: 215_I
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "安撫好阿明和阿婆後，我離開了涼茶鋪。我的心中有了一個清晰的目標：找到Kiera，從她那裏得到關於'管道'和AKHE的答案。這不僅關乎我的過去，更關乎涼茶鋪的未來。" # 這段旁白為後續主角聯繫Kiera的行為做了鋪墊。
     nextStep: 215_X
 
   - stepId: 215_X
