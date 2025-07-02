@@ -21,21 +21,10 @@ function TaskListView({ onAcceptTask, onExecuteTask, activeTask }) {
 
     // Simulate API call delay
     setTimeout(() => {
-      // Simulate success/failure (e.g., 90% success rate)
-      const success = Math.random() < 0.9;
-      if (success) {
-        setTaskStatus(prev => ({ ...prev, [taskId]: 'accepted' }));
-        console.log(`Task accepted: ${task.title}`);
-        onAcceptTask(task); // Call the callback passed from App.jsx
-      } else {
-        setTaskStatus(prev => ({ ...prev, [taskId]: 'failed' }));
-         console.error(`Failed to accept task: ${task.title}`);
-         // Reset failed status after a few seconds to allow retry
-         setTimeout(() => {
-           setTaskStatus(prev => ({ ...prev, [taskId]: 'idle' }));
-         }, 2500);
-      }
-      // Note: 'accepted' status persists in this simulation
+      // The simulated failure was causing confusion. We will now make it always succeed.
+      setTaskStatus(prev => ({ ...prev, [taskId]: 'accepted' }));
+      console.log(`Task accepted: ${task.title}`);
+      onAcceptTask(task); // Call the callback passed from App.jsx
     }, 1200); // 1.2 second delay
   };
 
