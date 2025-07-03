@@ -118,6 +118,24 @@ export const puzzlesDB = {
       content: "你成功解读了警告标记 - 这座电站充满危险。"
     }
   },
+
+  libraryPuzzle: {
+    puzzleId: 'libraryPuzzle',
+    title: '隐藏的图书馆',
+    description: '这所中学里似乎藏着一个图书馆，这所中学的名字是什么？（后两个字）',
+    status: 'locked',
+    solutionType: 'code',
+    solution: '慕德',
+    initialVariables: { attemptsMade: 0, hintUnlocked: false },
+    relatedClueIds: ['clue_school_map', 'clue_library_hints'],
+    onSolveActions: [
+      { type: 'dialogue', personaId: 'echo', text: '慕德...这个名字背后一定还有更多故事。', nextStep: null }
+    ],
+    solvedDisplay: {
+      type: 'text',
+      content: "你找到了隐藏的图书馆 - 它位于慕德中学内。"
+    }
+  },
   playgroundPuzzle0: {
     puzzleId: 'playgroundPuzzle0',
     title: '兔子的数量',

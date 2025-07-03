@@ -136,7 +136,7 @@ const svms = [
     longitude: 114.2661,
     owner: "NSGD (Police)",
     description: "由于资本垄断，垃圾回收的费用过高，这小角落成为了附近居民的废弃垃圾场，常有流浪者和无家可归者在此聚集。虽然环境恶劣，但偶尔会有意外的发现。",
-    mapVisibility: true
+    mapVisibility: false
   },
   {
     id: 10,
@@ -158,6 +158,28 @@ const svms = [
     longitude: 114.268276,
     owner: "NSGD (Police)",
     description: "坑口区平民窟附近的商场，阿明上班的OK便利店所在的位置，也是主人公和阿明遇见的地方",
+    mapVisibility: false
+  },
+  {
+    id: 12,
+    name: "亚洲文献与设计资料中心（Asian Documentation and Design Center）",
+    status: "Online",
+    location:  "Underground District",
+    latitude: 22.317809,
+    longitude: 114.268003,
+    owner: "NSGD (Police)",
+    description: "非常全面的文献资料中心，这里隐藏了关于香港的一切",
+    mapVisibility: false
+  },
+  {
+    id: 13,
+    name: "AKHE Studio",
+    status: "Online",
+    location:  "Underground District",
+    latitude: 22.318199,
+    longitude: 114.271310,
+    owner: "KF地产",
+    description: "一个奇怪的Studio，不知道隐藏了什么样的秘密",
     mapVisibility: false
   }
 ];

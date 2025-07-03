@@ -7,7 +7,7 @@ const products = [
     price: 2.50,
     description: "Refreshing cyberpunk-themed soda",
     category: "food",
-    svmId: [1, 2, 3, 5]
+    svmId: [1, 2, 3, 5, 12, 13]
   },
   {
     productId: 102,
@@ -15,7 +15,7 @@ const products = [
     price: 3.00,
     description: "Crunchy chips with glowing flavor",
     category: "food",
-    svmId: [1, 2, 5]
+    svmId: [1, 2, 5, 13]
   },
   {
     productId: 103,
@@ -23,7 +23,7 @@ const products = [
     price: 4.50,
     description: "Futuristic nutrient-packed sandwich",
     category: "food",
-    svmId: [1, 3, 5]
+    svmId: [1, 3, 5, 12]
   },
   {
     productId: 104,
@@ -31,7 +31,7 @@ const products = [
     price: 1.75,
     description: "Ultra-purified water with electrolytes",
     category: "drink",
-    svmId: [1, 2, 3, 5]
+    svmId: [1, 2, 3, 5, 12, 13]
   },
   {
     productId: 105,

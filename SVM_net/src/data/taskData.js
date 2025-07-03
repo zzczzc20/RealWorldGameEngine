@@ -126,18 +126,18 @@ tasks.push({
       "doc_deconstruction": { id: "doc_deconstruction", type: "text", content: "主义：解构主义。通过破碎和重组，暴露事物内在的矛盾。"},
       "doc_parody": { id: "doc_parody", type: "text", content: "核心概念：对主流秩序的冷峻戏仿。挑战观众的预设观念，通过荒诞的并置引发思考。相关项目：'都市迷宫'艺术装置。"},
       "doc_ironic_aesthetics": { id: "doc_ironic_aesthetics", type: "text", content: "美学思想：反讽美学。故意使用廉价、日常的材料创作，颠覆传统奢侈品概念，营造一种疏离感。"},
-      "keyword_ak": { id: "keyword_ak", type: "text", content: "关键词高亮: 'AK'"},
+      "keyword_ak": { id: "keyword_ak", type: "text", content: "关键词高亮: 'AK__'"},
       "keyword_alienation": { id: "keyword_alienation", type: "text", content: "关键词高亮: '疏离', '反讽'"},
       "doc_heterotopia": { id: "doc_heterotopia", type: "text", content: "空间理论：异质空间。创造出现实中不存在，仅存于精神层面的场所，作为对现实世界的批判。"},
       "keyword_h": { id: "keyword_h", type: "text", content: "关键词高亮: 'H'"},
       "keyword_e": { id: "keyword_e", type: "text", content: "关键词高亮: 'E'"},
       "doc_final_manifesto": { id: "doc_final_manifesto", type: "text", content: "设计宣言：'我的设计，是献给这个荒诞世界最真诚的玩笑。'"},
-      "final_doc_title": { id: "final_doc_title", type: "text", content: "档案标题: 设计师档案：__H_ __E__"}
+      "final_doc_title": { id: "final_doc_title", type: "text", content: "档案标题: 设计师档案：__H_ ___E"}
     },
     stages: [
       {
         stageId: 0,
-        initialClues: ["doc_new_minimalism", "doc_organic", "doc_deconstruction", "doc_parody", "doc_ironic_aesthetics"],
+        initialClues: ["doc_new_minimalism", "doc_parody", "doc_organic", "doc_deconstruction", "doc_ironic_aesthetics"],
         keyClueIds: ["doc_parody", "doc_ironic_aesthetics"],
         revelations: {
           "doc_parody": ["keyword_ak"],
@@ -146,7 +146,7 @@ tasks.push({
       },
       {
         stageId: 1,
-        initialClues: ["doc_heterotopia"],
+        initialClues: ["doc_heterotopia", "keyword_ak"],
         keyClueIds: ["doc_heterotopia"],
         revelations: {
           "doc_heterotopia": ["keyword_h", "keyword_e"]

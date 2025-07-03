@@ -51,7 +51,7 @@ steps:
         effect: { type: 'slideInLeft', duration: 1.0 }
     owner: "AhMing"
     text: "（看著失魂落魄的阿明，你不知如何安慰。'不要滋養無根的野草'…'回聲'的話語讓你感到一陣寒意。你拿出Kiera給的那張帶有奇特符號的名片。）阿明，先別想了。我們得先離開這裏。我…我還有點事要做。"
-    nextStep: 202_ai_dialogue
+    nextStep: kiera_0
 
   - stepId: 202_ai_dialogue
     type: aiDialogue
@@ -59,6 +59,36 @@ steps:
     owner: "AhMing"
     prompt: "看着阿明颓丧的样子，我觉得我应该说些什么来鼓励他。但言语是那么苍白，我该怎么组织语言，才能真正给他一点力量，而不是空洞的安慰？"
     nextStep: 202_branch
+
+  - stepId: kiera_0 # 解鎖第一個裂隙調諧器任務
+    type: UNLOCK_TASK
+    taskId: "RIFT_TUNER_AHMING"
+    nextStep: kiera_1
+
+  - stepId: kiera_1
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "我想要安慰阿明，我是不是应该用裂隙調諧器来了解阿明的内心？"
+    nextStep: kiera_5
+
+  - stepId: kiera_5 # 等待第一個任務完成
+    type: WAIT_FOR_TASK_COMPLETED
+    taskId: "RIFT_TUNER_AHMING"
+    nextStep: kiera_6
+    stepIdOnWait: kiera_7
+
+  - stepId: kiera_6 # 第一個任務完成後
+    type: dialogue
+    persona: "Protagonist_Internal"
+    text: "通过裂隙調諧器，我了解了阿明的内心，我现在更有信心让他鼓起勇气了！"
+    nextStep: 202_ai_dialogue
+
+  - stepId: kiera_7 # 等待時的循環消息
+    type: dialogue
+    persona: "Protagonist_Internal"
+    text: "裂隙調諧器在等待你的操作...前往任務列錶完成調諧。"
+    nextStep: kiera_5
 
   - stepId: 202_branch
     type: branch
@@ -74,7 +104,7 @@ steps:
   - stepId: 202_fail
     type: dialogue
     persona: "AhMing"
-    text: "【阿明没有被成功鼓励，请再次尝试！（好感度不足）】（摇了摇头，没有看你）……强哥，你别说了，让我一个人静一静。你根本不懂。"
+    text: "【阿明没有被成功鼓励，请再次尝试！（好感度不足，再试一次）】（摇了摇头，没有看你）……强哥，你别说了，让我一个人静一静。你根本不懂。"
     nextStep: 202_ai_dialogue
 
   - stepId: 202_success
@@ -138,10 +168,39 @@ steps:
     persona: "Player"
     owner: "Kiera"
     prompt: "Kiera小姐你好...我是上次给你调昨日回响的那位..."
+    nextStep: 203_A
+
+  - stepId: 203_A
+    type: branch
+    condition:
+      target: personas
+      id: Kiera
+      property: favorability
+      operator: '>='
+      value: 65
+    nextStepOnTrue: k_success
+    nextStepOnFalse: k_fail
+
+  - stepId: k_fail
+    type: dialogue
+    persona: "Kiera"
+    text: "【看起来你和Kiera的交流不是很顺利，请再次尝试！（好感度不足，再试一次）】（摇了摇头，没有看你）……小哥哥，要不我们下次再聊？"
+    nextStep: kiera_x3
+
+  - stepId: k_success
+    type: dialogue
+    persona: "Kiera"
+    text: "同你傾下好開心啊，下次見啦！"
     nextStep: 203
 
-
   - stepId: 203
+    type: dialogue
+    persona: "Protagonist_Internal"
+    image: /assets/images/HK_2085.png
+    text: "我从床上起来，虽然梦里和Kiera进行了交流，但是现实中，谜题的真相我仍然一无所知！" # 主角決定將註意力轉向Kiera的線索。
+    nextStep: 203_P
+
+  - stepId: 203_P
     type: dialogue
     persona: "Protagonist_Internal"
     image: /assets/images/kiera_new_card_closeup.png
@@ -165,19 +224,65 @@ steps:
     id: "Echo"
     property: requiresChatWindow
     value: true
+    nextStep: 206_P
+
+  - stepId: 206_P
+    type: updateWorldState
+    target: svms
+    id: 12
+    property: mapVisibility
+    value: true
     nextStep: 206
 
   - stepId: 206
     type: dialogue
     persona: "Echo"
-    text: "光會說謊，塵埃儲存記憶。去往文字被遺忘的墳場。" # Echo給出新的、更具體的指令，暗示需要尋找物理的、陳舊的資料。
+    text: "光會說謊，塵埃儲存記憶。去往文字被遺忘的墳場。(地点已经为你在地图上亮起)" # Echo給出新的、更具體的指令，暗示需要尋找物理的、陳舊的資料。
     nextStep: 207
 
   - stepId: 207
     type: dialogue
     text: "我思考著'回聲'的話。'文字被遺忘的墳場'…是指圖書館？還是…檔案館？我想起來，在城市重建的浪潮中，有一個'亞洲文獻與設計資料中心'被保留了下來，收藏著大量舊時代的資料。也許，我該去那裏看看。"
     persona: "Protagonist_Internal"
+    nextStep: echo_1
+
+  - stepId: echo_1
+    type: dialogue
+    persona: "Echo"
+    text: "还原缺失的文字吧！" # Echo給出新的、更具體的指令，暗示需要尋找物理的、陳舊的資料。
+    image: /assets/images/school.png
+    nextStep: lib_23
+
+  - stepId: lib_23 # Activate library puzzle
+    type: ACTIVATE_PUZZLE
+    puzzleId: "libraryPuzzle" # Library name puzzle
+    nextStep: lib_24
+
+  - stepId: lib_24
+    type: dialogue
+    persona: "echo"
+    text: "圖書館的檔案中藏著在一所中學里..."
+    image: /assets/images/school.png
+    nextStep: lib_25
+
+  - stepId: lib_25 # Wait for library puzzle to be solved
+    type: WAIT_FOR_PUZZLE_SOLVED
+    puzzleId: "libraryPuzzle"
+    nextStep: lib_26
+    stepIdOnWait: lib_27
+
+  - stepId: lib_26 # When puzzle is solved
+    type: dialogue 
+    persona: "Protagonist_Internal"
+    text: "我到了这所中學...据说是为了纪念挪威已故女皇“慕德皇后”而设立的中学，最初叫難童義務學校，接下来只要潜入学校的地下室，应该就可以见到资料中心了"
+    image: /assets/images/school_un.png
     nextStep: 207_1
+
+  - stepId: lib_27 # Loop while waiting for puzzle
+    type: dialogue
+    persona: "echo" 
+    text: "繼續在檔案中尋找線索..."
+    nextStep: lib_25
 
   - stepId: 207_1
     type: updateWorldState
@@ -406,13 +511,6 @@ steps:
         position: center
         effect: { type: 'slideInLeft', duration: 1.0 }
     text: "阿婆，阿明，這件事…請交給我試試看。我可能…有辦法找到那把'鑰匙'。你們先照顧好自己，不要和他們起正面衝突。" # 主角決定承擔起這個任務，並安撫二人。
-    nextStep: 215_I
-
-  - stepId: 215_I
-    type: dialogue
-    persona: "Narrator"
-    owner: "Protagonist_Internal"
-    text: "安撫好阿明和阿婆後，我離開了涼茶鋪。我的心中有了一個清晰的目標：找到Kiera，從她那裏得到關於'管道'和AKHE的答案。這不僅關乎我的過去，更關乎涼茶鋪的未來。" # 這段旁白為後續主角聯繫Kiera的行為做了鋪墊。
     nextStep: 216
 
   - stepId: 216
@@ -443,6 +541,13 @@ steps:
     prompt: "我看著病倒的婆婆和手足無措的阿明，又想到'回聲'那毫無溫度的指令，內心劇烈地掙扎。幫助他們，似乎是天經地義的選擇，但這會不會只是徒勞？就像在沙地上潑水一樣？而追尋AKHE的線索，又感覺像是在背棄眼前活生生的苦難。我該怎麼辦？"
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
+    nextStep: 215_I
+
+  - stepId: 215_I
+    type: dialogue
+    persona: "Narrator"
+    owner: "Protagonist_Internal"
+    text: "安撫好阿明和阿婆後，我離開了涼茶鋪。我的心中有了一個清晰的目標：找到Kiera，從她那裏得到關於'管道'和AKHE的答案。這不僅關乎我的過去，更關乎涼茶鋪的未來。" # 這段旁白為後續主角聯繫Kiera的行為做了鋪墊。
     nextStep: 220
 
   - stepId: 220 # 主角決定聯繫Kiera
@@ -464,12 +569,20 @@ steps:
     persona: "Player"
     owner: "Kiera" # 使用新的聯繫方式
     text: "Kiera小姐，我是上次在涼茶鋪為你調制‘昨日回響’的人。我找到了符號的含義，它指向AKHE。"
+    nextStep: 222_P
+
+  - stepId: 222_P
+    type: updateWorldState
+    target: svms
+    id: 13
+    property: mapVisibility
+    value: true
     nextStep: 222
 
   - stepId: 222
     type: dialogue
     persona: "Kiera"
-    text: "（信息過了很久才回覆）…你居然真的找到了。我很驚訝。看來你比我想象的更有趣。我們見一面吧，去他留下的一個地方。有些東西，或許你該親眼看看。地址我稍後發你。" # Kiera的回應，既有驚訝，也保持著距離感。
+    text: "（信息過了很久才回覆）…你居然真的找到了。我很驚訝。看來你比我想象的更有趣。我們見一面吧，去他留下的一個地方。有些東西，或許你該親眼看看。地址我稍後發你。【地点已在地图上亮起】" # Kiera的回應，既有驚訝，也保持著距離感。
     nextStep: 223
 
   - stepId: 223 # 第二次會面
@@ -492,7 +605,7 @@ steps:
       - id: Kiera
         sprite: /assets/images/Kiera_casual.png
         position: center
-    text: "這裏…是我祖父AKHE留下的地方。我父親（KF）不喜歡這裏，覺得它不切實際。但我偶爾會偷偷跑來。我總覺得，這裏藏著一些…被遺忘的東西。" # Kiera透露符號與KGF的關係，並無意中提及KF，但主角此時不知KF是誰。
+    text: "這裏…是我祖父AKHE留下的地方。我父親不喜歡這裏，覺得它不切實際。但我偶爾會偷偷跑來。我總覺得，這裏藏著一些…被遺忘的東西。" # Kiera透露符號與KGF的關係，並無意中提及KF，但主角此時不知KF是誰。
     nextStep: 224
 
   - stepId: 224
@@ -647,12 +760,12 @@ steps:
     persona: "Narrator"
     owner: "Protagonist_Internal"
     audio: /assets/audio/km_log_2.mp3 # TODO: 需要音頻，女聲，語氣變得冰冷而堅定，充滿使命感。
-    text: "（音頻2）…父親的壓迫，和他那庸俗的秩序，必須被打破。祖父的理念將由我來實現！我們將建造'方舟'，帶領信徒離開這片虛偽的土地！那些無法理解的，將在火焰中得到淨化！" # 提及“方舟(舟)”和“淨化”，與Sera補充說明對應。
+    text: "（音頻2）…他的壓迫，和他那庸俗的秩序，必須被打破！我們將建造'方舟'，帶領信徒離開這片虛偽的土地！那些無法理解的，將在火焰中得到淨化！" # 提及“方舟(舟)”和“淨化”，與Sera補充說明對應。
     nextStep: 236
 
   - stepId: 236
     type: aiDialogue
-    prompt: "我震驚地聽著這些錄音。這聲音…無疑是Kiera的，但語氣和內容卻像完全變了一個人。充滿了偏執的激情和危險的思想。'管道'？'方舟'？這都是什麼？'父親的壓迫'？是指KF嗎？'祖父的理念'？她想繼承AKHE的什麼？'火焰'…'淨化'…難道她正在策劃某種可怕的恐怖襲擊或大型破壞活動？她光鮮的網紅外表下，竟然隱藏著這樣黑暗的一面？"
+    prompt: "我震驚地聽著這些錄音。這聲音…無疑是Kiera的，但語氣和內容卻像完全變了一個人。充滿了偏執的激情和危險的思想。'管道'？'方舟'？這都是什麼？'他的壓迫'？她想繼承AKHE的什麼？'火焰'…'淨化'…難道她正在策劃某種可怕的恐怖襲擊或大型破壞活動？她光鮮的網紅外表下，竟然隱藏著這樣黑暗的一面？"
     persona: "Protagonist_Internal"
     waitFor: dialogueClosed
     nextStep: 237
