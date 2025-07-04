@@ -29,11 +29,11 @@ function LogicPuzzleGame({ isVisible, onClose, taskData, onSuccess, onFailure })
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 font-sans">
-      <CyberCard className="w-full max-w-lg md:max-w-4xl bg-gray-900/90 border-cyan-500/50 shadow-2xl shadow-cyan-500/20 backdrop-blur-sm">
-        <div className="p-6 relative">
+      <CyberCard className="w-full max-w-lg md:max-w-4xl bg-gray-900/90 border-cyan-500/50 shadow-2xl shadow-cyan-500/20 backdrop-blur-sm flex flex-col max-h-[95vh]">
+        <div className="p-4 md:p-6 relative overflow-y-auto flex-grow">
           
           {gameState === 'playing' && (
-            <LogicPuzzleView 
+            <LogicPuzzleView
               task={taskData}
               onSolve={handleSolve}
               onFail={handleFail}
