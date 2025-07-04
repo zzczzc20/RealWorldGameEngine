@@ -607,7 +607,7 @@ steps:
   - stepId: puzzle_solved # When puzzle is solved
     type: dialogue 
     persona: "Protagonist_Internal"
-    text: "我找到了这间工作室...据说是一位叫AKHE的设计师的旧工作室，门口的牌子已经斑驳不清，但依稀能看出'海'这个字样。看来这里就是资料中心提到的地方了。"
+    text: "我找到了这间工作室...据说是一位叫AKHE的设计师的旧工作室，门口的牌子已经斑驳不清，但依稀能看出'海'这个字样。看来这里就是Kiera提到的地方了。我发现了一条暗道，在里面走了好久，天都黑了，终于找到了出口！"
     image: /assets/images/studio_entrance.png
     nextStep: 223
 
@@ -686,7 +686,12 @@ steps:
     persona: "Protagonist_Internal"
     image: /assets/images/dream.png 
     text: "她的話讓我感到一陣寒意。夢境、火焰、失控的人群…這和我的夢境何其相似。她的'實驗性直播'，難道就是…？我看向房間中央那個巨大的建築藍圖，它似乎是一個互動裝置。"
-    nextStep: 227
+    nextStep: 227_A
+
+  - stepId: 227_A
+    type: UNLOCK_CLUE
+    clueId: "AKHE_note" # 解鎖線索：KM的音頻日誌（主角誤認為是Kiera的）
+    nextStep: 227  
 
   - stepId: 227
     type: ACTIVATE_PUZZLE
@@ -853,7 +858,18 @@ steps:
     type: dialogue
     persona: "Echo"
     text: "障礙正在崩塌。裂痕已清晰可見。跟隨它，不要回頭。這是唯一的路。" # Echo在此刻發出最強硬的指令，要求主角放棄倫理，追尋真相。
-    nextStep: 240
+    nextStep: sync_checkpoint_after_dream_and_echo
+
+  - stepId: sync_checkpoint_after_dream_and_echo # New step to trigger data synchronization
+    type: TRIGGER_DATA_SYNC
+    payload: # Optional: Specify which data types to sync. If omitted, WorldStateContext might sync a default set.
+      dataTypes: 
+        - "chatHistories"
+        - "playerState"
+        - "discoveredClues"
+        - "currentPuzzleState"
+      # includeOptionalData: false # Example: explicitly not including svms, activeTask unless specified
+    nextStep: 240 # Proceed to the original next step
 
   - stepId: 240
     type: dialogue

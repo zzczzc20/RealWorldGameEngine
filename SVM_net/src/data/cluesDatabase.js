@@ -107,6 +107,24 @@ export const cluesDB = {
     description: '一张带有神秘符号的Kiera卡片',
     source: 'svm_interaction_B02',
   },
+  AKHE_note: {
+    id: 'AKHE_note',
+    puzzleId: 'newsPuzzle',
+    title: 'AKHE的神秘手记',
+    type: 'image_url',
+    content: '/assets/images/blue_print.png',
+    description: 'AKHE的神秘手记',
+    source: 'svm_interaction_B02',
+  },
+  KM_audio_logs: {
+    id: 'KM_audio_logs',
+    puzzleId: 'KMIdentity',
+    title: '神秘的音频记录',
+    type: 'text',
+    content: '两段令人不安的音频记录，提到了"方舟"和某种"演出"。说话者似乎在策划什么...',
+    description: '两段令人不安的音频记录，提到了"方舟"和某种"演出"。说话者似乎在策划什么...',
+    source: 'environment_pickup_A01',
+  },
   // Add more predefined clues here as needed for different puzzles
 };
 
