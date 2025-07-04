@@ -583,7 +583,40 @@ steps:
     type: dialogue
     persona: "Kiera"
     text: "（信息過了很久才回覆）…你居然真的找到了。我很驚訝。看來你比我想象的更有趣。我們見一面吧，去他留下的一個地方。有些東西，或許你該親眼看看。地址我稍後發你。【地点已在地图上亮起】" # Kiera的回應，既有驚訝，也保持著距離感。
+    nextStep: puzzle_activate_studio
+
+
+  - stepId: puzzle_activate_studio # Activate studio sign puzzle
+    type: ACTIVATE_PUZZLE
+    puzzleId: "studioSignPuzzle" # Studio name puzzle
+    nextStep: puzzle_dialogue_1
+
+  - stepId: puzzle_dialogue_1
+    type: dialogue
+    persona: "echo"
+    text: "我走到了附近，发现了一个伪装成轮胎服务的破屋子，..."
+    image: /assets/images/studio_exterior.png
+    nextStep: puzzle_wait_solve
+
+  - stepId: puzzle_wait_solve # Wait for studio puzzle to be solved
+    type: WAIT_FOR_PUZZLE_SOLVED
+    puzzleId: "studioSignPuzzle"
+    nextStep: puzzle_solved
+    stepIdOnWait: puzzle_hint
+
+  - stepId: puzzle_solved # When puzzle is solved
+    type: dialogue 
+    persona: "Protagonist_Internal"
+    text: "我找到了这间工作室...据说是一位叫AKHE的设计师的旧工作室，门口的牌子已经斑驳不清，但依稀能看出'海'这个字样。看来这里就是资料中心提到的地方了。"
+    image: /assets/images/studio_entrance.png
     nextStep: 223
+
+  - stepId: puzzle_hint # Loop while waiting for puzzle
+    type: dialogue
+    persona: "echo" 
+    text: "继续寻找牌子上的线索..."
+    nextStep: puzzle_wait_solve
+
 
   - stepId: 223 # 第二次會面
     type: dialogue
@@ -678,6 +711,26 @@ steps:
     # 謎題線索：筆記1：“庇護所即是牢籠。” 筆記2：“出口即是陷阱。” 筆記3：“最穩固的支撐，來自於虛空。”
     # 謎題邏輯：玩家需要根據這些充滿悖論的哲學提示來調整藍圖。例如，將代表“安全區”的模塊旋轉180度，使其出口朝向內部，形成一個封閉結構。將一個看似是“承重柱”的實體結構替換為一個“留白”的空間。
     # 解決方案：當所有模塊都按照悖論邏輯調整好後，藍圖會投射出一道光，指向牆上一個偽裝成通風口的暗格。暗格的開關，是一個倒置的“感嘆號”形狀。 (暗示Sera的標誌)
+    nextStep: 228_P
+
+  - stepId: 228_P
+    type: dialogue
+    persona: "Kiera"
+    image: /assets/images/blue_print.png 
+    characters:
+      - id: Kiera
+        sprite: /assets/images/Kiera_casual.png
+        position: center
+      - id: KM
+        sprite: /assets/images/KM_sprite.png
+        position: right
+    text: "他說'他們稱我為建築師，但我只是個光與影的僕人。我為他們建造了庇護所，祂的光芒既創造生命，也投下無法逃離的陰影。這座建築，就是我的神廟，也是我的罪證，我的哲學即是我的密碼。'"
+    # 謎題描述：KGF_Blueprint_Puzzle
+    # 類型：空間邏輯與哲學理念結合。
+    # 界面：一個巨大的全息建築藍圖，可以旋轉和縮放。藍圖上有幾個關鍵節點是錯位的。旁邊有幾條KGF的筆記。
+    # 謎題線索：筆記1：“庇護所即是牢籠。” 筆記2：“出口即是陷阱。” 筆記3：“最穩固的支撐，來自於虛空。”
+    # 謎題邏輯：玩家需要根據這些充滿悖論的哲學提示來調整藍圖。例如，將代表“安全區”的模塊旋轉180度，使其出口朝向內部，形成一個封閉結構。將一個看似是“承重柱”的實體結構替換為一個“留白”的空間。
+    # 解決方案：當所有模塊都按照悖論邏輯調整好後，藍圖會投射出一道光，指向牆上一個偽裝成通風口的暗格。暗格的開關，是一個倒置的“感嘆號”形狀。 (暗示Sera的標誌)
     nextStep: 228
 
   - stepId: 228
@@ -714,7 +767,7 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
-    text: "我接過晶片，插入終端。一個加密的檔案庫出現了，需要密碼才能訪問。"
+    text: "我接過晶片，插入終端。一個加密的檔案庫出現了，题目为CHEVSVPNGVBA，需要密碼才能訪問。"
     # 謎題描述：KM_archive_puzzle
     # 類型：文本理解與概念推理。
     # 界面：一個加密檔案的登錄界面，有密碼輸入框和一個“提示”按鈕。
@@ -793,6 +846,7 @@ steps:
         sprite: /assets/images/lawyer_sprite.png
         position: right
     text: "（電話背景音傳來一個冷漠的聲音）這位先生，請保持冷靜。我們是依法辦事。這片區域，包括這家店鋪，都屬於'工廠社區遺址活化項目'的一部分。拒不配合，我們將採取強制措施。" # KF勢力正式登場，並扭曲歷史為己用。
+    image: /assets/images/tea_store.png
     nextStep: 239
 
   - stepId: 239
@@ -805,6 +859,7 @@ steps:
     type: dialogue
     persona: "Narrator"
     owner: "Protagonist_Internal"
+    image: /assets/images/tea_store.png
     text: "一邊是倒下的婆婆和阿明絕望的哭喊，一邊是通往我身世之謎的唯一線索。'回聲'的指令前所未有地清晰和急迫，而KF地產的出現，讓所有苦難都有了具體的源頭。我站在了命運的十字路口，時間仿佛在此刻凝固。"
     choices:
       - text: "不顧一切，立刻趕回涼茶鋪。"

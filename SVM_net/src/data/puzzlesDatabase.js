@@ -190,7 +190,7 @@ export const puzzlesDB = {
   KM_archive_puzzle: {
     puzzleId: 'KM_archive_puzzle',
     title: '加密档案',
-    description: '一个需要密码的加密档案。KGF留下的话似乎暗示着什么...',
+    description: '一个需要密码的加密档案。AKHE留下的话似乎暗示着什么...',
     status: 'locked',
     solutionType: 'code',
     solution: 'PURIFICATION',
@@ -209,9 +209,31 @@ export const puzzlesDB = {
       content: "你成功解开了加密档案，里面的内容令人不安..."
     }
   },
+  studioSignPuzzle: {
+    puzzleId: 'studioSignPuzzle',
+    title: 'AKHE工作室谜题',
+    description: '请输入AKHE工作室的标记（请用英文大写字母回答）',
+    status: 'locked',
+    solutionType: 'code',
+    solution: 'MAXTREK',
+    initialVariables: { 
+      attemptsMade: 0, 
+      hintUnlocked: false,
+      hintShown: false
+    },
+    relatedClueIds: ['clue_KGF_studio'],
+    onSolveActions: [
+      { type: 'dialogue', personaId: 'system', text: '工作室谜题解开了。', nextStep: null },
+      { type: 'UNLOCK_CLUE', clueId: 'KGF_studio_revealed', nextStep: null }
+    ],
+    solvedDisplay: {
+      type: 'text',
+      content: "你解开了AKHE工作室的谜题，获得了重要的线索..."
+    }
+  },
   KGF_Blueprint_Puzzle: {
     puzzleId: 'KGF_Blueprint_Puzzle',
-    title: 'KGF的笔记谜题',
+    title: 'AKHE的笔记谜题',
     description: '笔记1："庇护所即是牢籠。" 笔记2："出口即是陷阱。" 笔记3："最穩固的支撐，來自於虛空。"',
     status: 'locked',
     solutionType: 'code',
@@ -228,7 +250,7 @@ export const puzzlesDB = {
     ],
     solvedDisplay: {
       type: 'text',
-      content: "你解开了KGF留下的笔记谜题，获得了重要的线索..."
+      content: "你解开了AKHE留下的笔记谜题，获得了重要的线索..."
     }
   },
   mingTakCodeEntry: {
