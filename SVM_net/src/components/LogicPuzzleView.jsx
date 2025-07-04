@@ -1,12 +1,6 @@
 // src/components/LogicPuzzleView.jsx
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import React, { useState, useEffect, useCallback } from 'react';
 import CyberButton from './ui/CyberButton';
-
-const ItemTypes = {
-  CLUE: 'clue',
-};
 
 const HeartIcon = ({ filled = true }) => (
   <svg className={`w-6 h-6 ${filled ? 'text-red-500' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
@@ -14,53 +8,36 @@ const HeartIcon = ({ filled = true }) => (
   </svg>
 );
 
-const DraggableClue = ({ clue, isDraggable }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: ItemTypes.CLUE,
-    item: { id: clue.id },
-    canDrag: isDraggable,
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-  }));
-
+const ClickableClue = ({ clue, isClickable, onClick }) => {
   return (
     <div
-      ref={drag}
-      className={`p-3 border rounded-md transition-colors duration-200 ${isDraggable ? 'border-cyan-700/50 bg-gray-800/60 cursor-pointer hover:bg-cyan-900/50' : 'border-gray-700/30 bg-gray-900/50 text-gray-500 cursor-not-allowed'} ${isDragging ? 'opacity-30' : 'opacity-100'}`}
-      style={{ touchAction: 'none' }}
+      onClick={() => isClickable && onClick(clue.id)}
+      className={`p-3 border rounded-md transition-colors duration-200 ${isClickable ? 'border-cyan-700/50 bg-gray-800/60 cursor-pointer hover:bg-cyan-900/50' : 'border-gray-700/30 bg-gray-900/50 text-gray-500 cursor-not-allowed'}`}
     >
       <p className="text-sm text-gray-300">{clue.content}</p>
     </div>
   );
 };
 
-const Clueboard = ({ onDrop, revealedClues }) => {
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: ItemTypes.CLUE,
-    drop: (item) => onDrop(item.id),
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-    }),
-  }), [onDrop]);
-  
+const Clueboard = ({ revealedClues }) => {
   return (
     <div
-      ref={drop}
-      className={`p-4 border-2 border-dashed rounded-lg min-h-[300px] transition-colors ${isOver ? 'border-yellow-400 bg-gray-700/50' : 'border-gray-600 bg-gray-800/30'}`}
+      className={`p-4 border-2 border-dashed rounded-lg min-h-[250px] md:min-h-[300px] border-gray-600 bg-gray-800/30 flex flex-col`}
     >
-      <h3 className="text-lg font-semibold text-cyan-300 mb-3 border-b border-cyan-500/30 pb-2">线索板</h3>
-      {revealedClues.length === 0 ? (
-        <p className="text-gray-500 italic text-center pt-12">将左侧的文档碎片拖拽到此处以分析线索...</p>
-      ) : (
-        <ul className="space-y-3">
-          {revealedClues.map((clue, index) => (
-            <li key={`${clue.id}-${index}`} className="bg-yellow-900/30 border border-yellow-500/50 p-3 rounded text-yellow-300 font-semibold animate-pulse">
-              {clue.content}
-            </li>
-          ))}
-        </ul>
-      )}
+      <h3 className="text-lg font-semibold text-cyan-300 mb-3 border-b border-cyan-500/30 pb-2 flex-shrink-0">线索板</h3>
+      <div className="flex-grow overflow-y-auto">
+        {revealedClues.length === 0 ? (
+          <p className="text-gray-500 italic text-center pt-12">点击左侧的文档碎片以分析线索...</p>
+        ) : (
+          <ul className="space-y-3">
+            {revealedClues.map((clue, index) => (
+              <li key={`${clue.id}-${index}`} className="bg-yellow-900/30 border border-yellow-500/50 p-3 rounded text-yellow-300 font-semibold animate-pulse">
+                {clue.content}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };
@@ -127,7 +104,7 @@ const LogicPuzzleView = ({ task, onSolve, onFail }) => {
   }, [revealedClueObjects, currentStageIndex, puzzleData]);
 
 
-  const handleDropOnBoard = useCallback((clueId) => {
+  const handleClueClick = useCallback((clueId) => {
     if (cooldown > 0) return;
 
     const currentStage = puzzleData.stages[currentStageIndex];
@@ -173,7 +150,7 @@ const LogicPuzzleView = ({ task, onSolve, onFail }) => {
     } else {
       console.log(`[Drop] Already-penalized incorrect clue dropped: '${trimmedClueId}'`);
     }
-  }, [currentStageIndex, cooldown, incorrectlyDroppedIds, puzzleData, lives]);
+  }, [currentStageIndex, cooldown, incorrectlyDroppedIds, puzzleData]);
   
   const handleSubmit = () => {
     if (solution.toUpperCase().trim() === puzzleData.finalSolution) {
@@ -187,65 +164,63 @@ const LogicPuzzleView = ({ task, onSolve, onFail }) => {
   const isUIDisabled = cooldown > 0;
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className={`p-4 bg-gray-900 text-white rounded-lg font-mono transition-opacity ${isUIDisabled ? 'opacity-50' : 'opacity-100'}`}>
-        <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl text-cyan-400 font-bold">{task.title}</h2>
-            <div className="flex items-center space-x-2">
-                <div className="text-lg font-semibold text-yellow-400">
-                    Stage {currentStageIndex + 1} / {puzzleData.stages.length}
-                </div>
-                <div className="flex items-center space-x-1">
-                    {[...Array(5)].map((_, i) => <HeartIcon key={i} filled={i < lives} />)}
-                </div>
-            </div>
-        </div>
-
-        <p className="text-gray-400 mb-6">{task.description}</p>
-        
-        {isUIDisabled && (
-            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-10 rounded-lg">
-                <div className="text-4xl font-bold text-red-500 animate-pulse">SYSTEM LOCKDOWN</div>
-                <div className="text-xl text-gray-300 mt-2">
-                    Remaining Cooldown: {Math.floor(cooldown / 60)}:{(cooldown % 60).toString().padStart(2, '0')}
-                </div>
-            </div>
-        )}
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-          {/* Left Panel: Available Clues */}
-          <div>
-            <h3 className="text-lg font-semibold text-cyan-300 mb-3">数据库碎片</h3>
-            <div className="space-y-3 min-h-[300px] max-h-[400px] overflow-y-auto p-2 bg-black/30 rounded-lg">
-              {displayedClues.map(clue => (
-                <DraggableClue key={clue.id} clue={clue} isDraggable={!isUIDisabled} />
-              ))}
-            </div>
-          </div>
-          
-          {/* Right Panel: Clueboard & Solver */}
-          <div className="space-y-4">
-            <Clueboard onDrop={handleDropOnBoard} revealedClues={revealedClueObjects} />
-            
-            {isCompleted && (
-              <div className="flex items-center space-x-3 pt-4">
-                <input
-                  type="text"
-                  value={solution}
-                  onChange={(e) => setSolution(e.target.value)}
-                  placeholder="输入最终答案..."
-                  className="flex-grow bg-gray-800 border-2 border-cyan-700 focus:border-yellow-400 rounded-md px-4 py-2 text-white outline-none"
-                  disabled={isUIDisabled}
-                />
-                <CyberButton onClick={handleSubmit} disabled={isUIDisabled}>
-                  提交
-                </CyberButton>
+    <div className={`p-4 bg-gray-900 text-white rounded-lg font-mono transition-opacity ${isUIDisabled ? 'opacity-50' : 'opacity-100'}`}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+          <h2 className="text-xl text-cyan-400 font-bold">{task.title}</h2>
+          <div className="flex items-center space-x-2">
+              <div className="text-lg font-semibold text-yellow-400">
+                  Stage {currentStageIndex + 1} / {puzzleData.stages.length}
               </div>
-            )}
+              <div className="flex items-center space-x-1">
+                  {[...Array(5)].map((_, i) => <HeartIcon key={i} filled={i < lives} />)}
+              </div>
           </div>
+      </div>
+
+      <p className="text-gray-400 mb-6">{task.description}</p>
+      
+      {isUIDisabled && (
+          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-10 rounded-lg">
+              <div className="text-4xl font-bold text-red-500 animate-pulse">SYSTEM LOCKDOWN</div>
+              <div className="text-xl text-gray-300 mt-2">
+                  Remaining Cooldown: {Math.floor(cooldown / 60)}:{(cooldown % 60).toString().padStart(2, '0')}
+              </div>
+          </div>
+      )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+        {/* Left Panel: Available Clues */}
+        <div>
+          <h3 className="text-lg font-semibold text-cyan-300 mb-3">数据库碎片</h3>
+          <div className="space-y-3 min-h-[250px] max-h-[300px] md:max-h-[400px] overflow-y-auto p-2 bg-black/30 rounded-lg">
+            {displayedClues.map(clue => (
+              <ClickableClue key={clue.id} clue={clue} isClickable={!isUIDisabled} onClick={handleClueClick} />
+            ))}
+          </div>
+        </div>
+        
+        {/* Right Panel: Clueboard & Solver */}
+        <div className="flex flex-col space-y-4">
+          <Clueboard revealedClues={revealedClueObjects} />
+          
+          {isCompleted && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+              <input
+                type="text"
+                value={solution}
+                onChange={(e) => setSolution(e.target.value)}
+                placeholder="输入最终答案..."
+                className="flex-grow bg-gray-800 border-2 border-cyan-700 focus:border-yellow-400 rounded-md px-4 py-2 text-white outline-none"
+                disabled={isUIDisabled}
+              />
+              <CyberButton onClick={handleSubmit} disabled={isUIDisabled} className="w-full sm:w-auto">
+                提交
+              </CyberButton>
+            </div>
+          )}
         </div>
       </div>
-    </DndProvider>
+    </div>
   );
 };
 
