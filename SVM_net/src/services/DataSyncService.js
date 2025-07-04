@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // 后端 API 地址 - 请根据您的实际后端运行地址和端口进行修改
 // 如果您的 Flask 应用运行在本地的 5001 端口 (如 app.py 中的设置)
-const API_ENDPOINT = ' https://promising-humanitarian-electronic-repair.trycloudflare.com/api/log_data'; 
+const API_ENDPOINT = 'https://php-perceived-newark-swaziland.trycloudflare.com/api/log_data'; 
 // 如果您的前端和后端在不同源（例如，前端通过 vite dev server 运行在不同端口），
 // 您可能需要在 Flask 后端配置 CORS (Cross-Origin Resource Sharing)。
 // 一个简单的 Flask CORS 设置是: pip install flask-cors, 然后在 app.py 中:

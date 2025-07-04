@@ -212,7 +212,7 @@ export const puzzlesDB = {
   studioSignPuzzle: {
     puzzleId: 'studioSignPuzzle',
     title: 'AKHE工作室谜题',
-    description: '请输入AKHE工作室的标记（请用英文大写字母回答）',
+    description: '请输入AKHE工作室外轮胎公司名（请用英文大写字母回答）',
     status: 'locked',
     solutionType: 'code',
     solution: 'MAXTREK',

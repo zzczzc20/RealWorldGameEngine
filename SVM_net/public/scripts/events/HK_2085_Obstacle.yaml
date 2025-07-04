@@ -633,6 +633,7 @@ steps:
   - stepId: 223_1
     type: dialogue
     persona: "Kiera"
+    audio: /assets/audio/kgf1.mp3 # TODO: 需要音頻，女聲，語氣狂熱而充滿煽動性。
     image: /assets/images/kgf_studio_exterior.png
     characters:
       - id: Kiera
